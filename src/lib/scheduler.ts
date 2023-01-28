@@ -40,8 +40,8 @@ interface ISendMessageOptions {
   _qstashPublishOptions?: Omit<PublishJsonRequest, "body">;
 }
 
-interface IReceiveMessageReturnValue<R> {
-  jobResponse: R;
+interface IReceiveMessageReturnValue<JobResponse> {
+  jobResponse: JobResponse;
   message: string;
   error: boolean;
 }
