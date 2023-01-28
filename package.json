@@ -18,7 +18,9 @@
   "scripts": {
     "build": "tsup --config ./tsup.config.ts",
     "watch": "pnpm run build -- --watch src",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@upstash/qstash": "^0.3.4",
@@ -26,11 +28,13 @@
   },
   "devDependencies": {
     "@types/node": "^18.11.18",
+    "@vitest/coverage-c8": "^0.28.3",
     "next": "^13.1.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tsup": "^6.5.0",
     "typescript": "^4.9.3",
+    "vitest": "^0.28.3",
     "zx": "^7.1.1"
   }
 }
