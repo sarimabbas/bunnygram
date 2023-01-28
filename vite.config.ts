@@ -9,7 +9,7 @@ export default defineConfig({
     lib: {
       // Could also be a dictionary or array of multiple entry points
       entry: resolve(__dirname, "src/lib/index.ts"),
-      name: "next-up",
+      name: "bunnygram",
       // the proper extensions will be added
       fileName: "index",
     },

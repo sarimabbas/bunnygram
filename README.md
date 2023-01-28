@@ -1,4 +1,4 @@
-# Next-Up
+# Bunnygram
 
 ## Define env vars
 
