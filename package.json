@@ -1,6 +1,10 @@
 {
   "name": "bunnygram",
-  "version": "0.0.6",
+  "version": "0.0.7",
+  "files": [
+    "dist",
+    "src"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
