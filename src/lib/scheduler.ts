@@ -4,16 +4,16 @@ import type { NextApiHandler } from "next";
 import { z } from "zod";
 import { getApiRoutePath, getConfig, IGetConfigProps } from "./config";
 
-type IJob<JobPayload, JobResponse> = (
-  payload: JobPayload
-) => Promise<JobResponse>;
+type IJob<TJobPayload, TJobResponse> = (
+  payload: TJobPayload
+) => Promise<TJobResponse>;
 
-type ISendMessage<JobPayload> = (
-  payload: JobPayload,
+type ISendMessage<TJobPayload> = (
+  payload: TJobPayload,
   options?: ISendMessageOptions
 ) => Promise<void>;
 
-interface ISchedulerOptions<JobPayload> {
+interface ISchedulerOptions<TJobPayload> {
   /**
    * The relative path to the receiveMessage API route. We try to infer, so this is optional
    * @example `/api/send-email`
@@ -23,14 +23,14 @@ interface ISchedulerOptions<JobPayload> {
   /**
    * An optional zod validator for the payload
    */
-  validator?: z.ZodSchema<JobPayload>;
+  validator?: z.ZodSchema<TJobPayload>;
 
   config?: IGetConfigProps;
 }
 
-interface ISchedulerReturnValue<JobPayload, JobResponse> {
-  receiveMessage: NextApiHandler<IReceiveMessageReturnValue<JobResponse>>;
-  sendMessage: ISendMessage<JobPayload>;
+interface ISchedulerReturnValue<TJobPayload, TJobResponse> {
+  receiveMessage: NextApiHandler<IReceiveMessageReturnValue<TJobResponse> | null>;
+  sendMessage: ISendMessage<TJobPayload>;
 }
 
 interface ISendMessageOptions {
@@ -40,16 +40,16 @@ interface ISendMessageOptions {
   _qstashPublishOptions?: Omit<PublishJsonRequest, "body">;
 }
 
-interface IReceiveMessageReturnValue<JobResponse> {
-  jobResponse: JobResponse;
+interface IReceiveMessageReturnValue<TJobResponse> {
+  jobResponse?: TJobResponse;
   message: string;
   error: boolean;
 }
 
-export const Scheduler = <JobPayload, JobResponse>(
-  job: IJob<JobPayload, JobResponse>,
-  options?: ISchedulerOptions<JobPayload>
-): ISchedulerReturnValue<JobPayload, JobResponse> => {
+export const Scheduler = <TJobPayload, TJobResponse>(
+  job: IJob<TJobPayload, TJobResponse>,
+  options?: ISchedulerOptions<TJobPayload>
+): ISchedulerReturnValue<TJobPayload, TJobResponse> => {
   // define these outside so that the functions below can close over it
   const config = getConfig(options?.config);
 
@@ -58,9 +58,9 @@ export const Scheduler = <JobPayload, JobResponse>(
 
   // receives data from Qstash
   const receiveMessage: NextApiHandler<
-    IReceiveMessageReturnValue<JobResponse>
+    IReceiveMessageReturnValue<TJobResponse>
   > = async (req, res) => {
-    const payload: JobPayload = req.body;
+    const payload: TJobPayload = req.body;
 
     if (options?.validator) {
       options.validator.parse(payload);
@@ -68,17 +68,24 @@ export const Scheduler = <JobPayload, JobResponse>(
     }
 
     // run the job
-    const response = await job(payload);
-
-    res.status(200).json({
-      jobResponse: response,
-      message: "Job finished executing",
-      error: false,
-    });
+    try {
+      const response = await job(payload);
+      res.status(200).json({
+        jobResponse: response,
+        message: "Job finished executing",
+        error: false,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        message: err instanceof Error ? err.message : "Job failed to execute",
+        error: true,
+      });
+    }
   };
 
   // sends data to Qstash
-  const sendMessage: ISendMessage<JobPayload> = async (
+  const sendMessage: ISendMessage<TJobPayload> = async (
     payload,
     options = {}
   ) => {
