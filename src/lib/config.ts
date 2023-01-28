@@ -6,6 +6,8 @@ export const ZRequiredConfig = z.object({
     .describe(
       "The qstash token. We try to infer from process.env, so this is optional"
     ),
+  qstashCurrentSigningKey: z.string(),
+  qstashNextSigningKey: z.string(),
   baseUrl: z
     .string()
     .url()
@@ -20,6 +22,8 @@ export const getConfig = (props?: IGetConfigProps) => {
   const config = ZRequiredConfig.parse({
     baseUrl: getBaseUrl(props),
     qstashToken: getToken(props),
+    qstashCurrentSigningKey: getCurrentSigningKey(props),
+    qstashNextSigningKey: getNextSigningKey(props),
   });
   return config;
 };
@@ -44,6 +48,16 @@ export const getToken = (props?: IGetConfigProps) => {
     process.env.QSTASH_TOKEN ??
     process.env.NEXT_PUBLIC_QSTASH_TOKEN
   );
+};
+
+export const getCurrentSigningKey = (props?: IGetConfigProps) => {
+  return (
+    props?.qstashCurrentSigningKey ?? process.env.QSTASH_CURRENT_SIGNING_KEY
+  );
+};
+
+export const getNextSigningKey = (props?: IGetConfigProps) => {
+  return props?.qstashNextSigningKey ?? process.env.QSTASH_NEXT_SIGNING_KEY;
 };
 
 export const getApiRoutePath = (filename: string) => {

@@ -120,25 +120,10 @@ export const Scheduler = <TJobPayload, TJobResponse>(
   };
 
   return {
-    receiveMessage: verifySignature(receiveMessage),
+    receiveMessage: verifySignature(receiveMessage, {
+      currentSigningKey: config.qstashCurrentSigningKey,
+      nextSigningKey: config.qstashNextSigningKey,
+    }),
     sendMessage,
   };
 };
-
-// const { receiveMessage, sendMessage } = Scheduler(
-//   async ({ x }: { x: string }) => {
-//     return {
-//       id: "jekdkjhek",
-//     };
-//   },
-//   {}
-// );
-
-// sendMessage(
-//   {
-//     x: "eljgel",
-//   },
-//   {
-//     _qstashPublishOptions: {},
-//   }
-// );
