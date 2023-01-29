@@ -63,8 +63,18 @@ export const Scheduler = <TJobPayload, TJobResponse>(
     const payload: TJobPayload = req.body;
 
     if (options?.validator) {
-      options.validator.parse(payload);
-      // todo: try/catch and return response
+      try {
+        options.validator.parse(payload);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({
+          message:
+            err instanceof Error
+              ? err.message
+              : "Failed to validate request payload",
+          error: true,
+        });
+      }
     }
 
     // run the job
