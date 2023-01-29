@@ -17,7 +17,7 @@
   },
   "scripts": {
     "build": "tsup --config ./tsup.config.ts",
-    "watch": "pnpm run build -- --watch src",
+    "dev": "pnpm run build --watch src",
     "prepublishOnly": "pnpm run build",
     "test": "vitest",
     "coverage": "vitest run --coverage"
