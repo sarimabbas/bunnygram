@@ -3,7 +3,7 @@ import { verifySignature } from "@upstash/qstash/nextjs";
 import type { NextApiHandler } from "next";
 import { z } from "zod";
 import { getConfig, IGetConfigProps } from "./config";
-import { getBodyFromRawRequest } from "./utils";
+import { getBodyFromRawRequest, IErrorResponse } from "./utils";
 
 // generics key
 // JP: JobPayload
@@ -11,42 +11,87 @@ import { getBodyFromRawRequest } from "./utils";
 
 /**
  * IJob describes a job to be run
- * It takes in a JP type and returns a JR
+ * It takes in a payload of type JP and returns a JR
  */
 type IJob<JP, JR> = (payload: JP) => Promise<JR>;
 
+/**
+ * The input to the `Scheduler()` function
+ */
 interface ISchedulerProps<JP, JR> {
-  // the route it is reachable on
+  /**
+   * the route it is reachable on
+   */
   route: string;
 
-  // the job to run
+  /**
+   * the job to run
+   */
   job: IJob<JP, JR>;
 
-  // An optional zod validator for the incoming payload
+  /**
+   * an optional zod validator for the incoming payload
+   */
   validator?: z.ZodSchema<JP>;
 
-  // extra config
+  /**
+   * extra config
+   */
   config?: IGetConfigProps;
 }
 
+/**
+ * The output of the `Scheduler()` function
+ */
 interface ISchedulerReturnValue<JP, JR> {
+  /**
+   * NextJS API handler that should be default exported inside `api` directory
+   */
   handler: NextApiHandler<IReceiveMessageReturnValue<JR>>;
-  send: (props: ISendMessageProps<JP>) => Promise<{ messageId: string }>;
+
+  /**
+   * send a message to the scheduler. can be called in both client and
+   * serverside contexts
+   */
+  send: (props: ISendMessageProps<JP>) => Promise<ISendMessageReturnValue>;
 }
 
+/**
+ * The input of the `send()` function
+ */
 interface ISendMessageProps<JP> {
+  /**
+   * the payload that will eventually reach the handler
+   */
   payload: JP;
 
-  // The qstash publish options overrides
-  qstashPublishOptions?: Omit<PublishJsonRequest, "body">;
+  /**
+   * override the qstash.publishJSON method
+   */
+  qstashOptions?: Omit<PublishJsonRequest, "body">;
 }
 
-interface IReceiveMessageReturnValue<JR> {
+/**
+ * The output of the `send()` function
+ */
+interface ISendMessageReturnValue extends IErrorResponse {
+  messageId?: string;
+}
+
+/**
+ * The response structure of the API handler. This will be seen by QStash
+ */
+interface IReceiveMessageReturnValue<JR> extends IErrorResponse {
+  /**
+   * The output of the job
+   */
   jobResponse?: JR;
-  message: string;
-  error: boolean;
 }
 
+/**
+ * `Scheduler` sets up both a `handler` that can be used inside a NextJS API route
+ * and a `send` function to invoke it
+ */
 export const Scheduler = <JP, JR>(
   props: ISchedulerProps<JP, JR>
 ): ISchedulerReturnValue<JP, JR> => {
@@ -55,7 +100,14 @@ export const Scheduler = <JP, JR>(
 
   const isLocalhost = config.baseUrl.startsWith("http://localhost");
 
-  // receives data from Qstash
+  /**
+   * Receives incoming payload from QStash (or directly from `send()` via
+   * `fetch` if on `localhost`). Then, parses the payload and uses it to run the
+   * user-defined job.
+   * @param req - HTTP request object
+   * @param res - HTTP response object
+   * @returns a NextJS API handler
+   */
   const handler: NextApiHandler<IReceiveMessageReturnValue<JR>> = async (
     req,
     res
@@ -74,8 +126,6 @@ export const Scheduler = <JP, JR>(
     const payload: JP = isLocalhost
       ? await getBodyFromRawRequest(req)
       : req.body;
-
-    console.log({ payload });
 
     if (props?.validator) {
       try {
@@ -110,6 +160,7 @@ export const Scheduler = <JP, JR>(
   };
 
   // only do this when running inside a node environment
+  // this is because verifySignature relies on crypto
   const wrappedHandler =
     typeof window === "undefined" && !isLocalhost
       ? verifySignature(handler, {
@@ -118,13 +169,17 @@ export const Scheduler = <JP, JR>(
         })
       : handler;
 
-  // sends data to Qstash
+  /**
+   * Sends message to `handler` using QStash as the intermediary. If on
+   * `localhost`, sends message to handler via `fetch` directly. Can be used on
+   * client-side if `NEXT_PUBLIC_QSTASH_TOKEN` env var is set, or server-side if
+   * `QSTASH_TOKEN` env var is set. Can be used in both situations if
+   * `qstashToken` is set in the `Scheduler` config.
+   */
   const send = async (
     sendProps: ISendMessageProps<JP>
-  ): Promise<{
-    messageId: string;
-  }> => {
-    const { payload, qstashPublishOptions } = sendProps;
+  ): Promise<ISendMessageReturnValue> => {
+    const { payload, qstashOptions } = sendProps;
 
     const url = new URL(props.route, config.baseUrl).href;
 
@@ -138,15 +193,18 @@ export const Scheduler = <JP, JR>(
             "Content-Type": "application/json",
           },
         });
+        return {
+          error: false,
+          message: "POST to localhost succeeded",
+          messageId: "localhost",
+        };
       } catch (err) {
         console.error(err);
         return {
-          messageId: "error",
+          error: true,
+          message: "POST to localhost failed",
         };
       }
-      return {
-        messageId: "localhost",
-      };
     }
 
     // send to qstash
@@ -158,10 +216,12 @@ export const Scheduler = <JP, JR>(
     const { messageId } = await qstashClient.publishJSON({
       url,
       body: payload,
-      ...qstashPublishOptions,
+      ...qstashOptions,
     });
 
     return {
+      error: false,
+      message: "POST to QStash succeeded",
       messageId,
     };
   };

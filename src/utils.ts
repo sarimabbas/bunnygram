@@ -17,3 +17,8 @@ export const getBodyFromRawRequest = async (req: NextApiRequest) => {
   }
   return req.body;
 };
+
+export interface IErrorResponse {
+  message: string;
+  error: boolean;
+}
