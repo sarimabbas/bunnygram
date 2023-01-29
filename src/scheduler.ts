@@ -2,71 +2,66 @@ import { Client, PublishJsonRequest } from "@upstash/qstash";
 import { verifySignature } from "@upstash/qstash/nextjs";
 import type { NextApiHandler } from "next";
 import { z } from "zod";
-import { getApiRoutePath, getConfig, IGetConfigProps } from "./config";
+import { getConfig, IGetConfigProps } from "./config";
 
-type IJob<TJobPayload, TJobResponse> = (
-  payload: TJobPayload
-) => Promise<TJobResponse>;
+// generics key
+// JP: JobPayload
+// JR: JobResponse
 
-type ISendMessage<TJobPayload> = (
-  payload: TJobPayload,
-  options?: ISendMessageOptions
-) => Promise<{
-  // sent back from QStash when a message is queued
-  messageId: string;
-}>;
+/**
+ * IJob describes a job to be run
+ * It takes in a JP type and returns a JR
+ */
+type IJob<JP, JR> = (payload: JP) => Promise<JR>;
 
-interface ISchedulerOptions<TJobPayload> {
-  /**
-   * The relative path to the receiveMessage API route. We try to infer, so this is optional
-   * @example `/api/send-email`
-   */
-  receiveMessagePath?: string;
+interface ISchedulerProps<JP, JR> {
+  // the route it is reachable on
+  route: string;
 
-  /**
-   * An optional zod validator for the payload
-   */
-  validator?: z.ZodSchema<TJobPayload>;
+  // the job to run
+  job: IJob<JP, JR>;
 
+  // An optional zod validator for the incoming payload
+  validator?: z.ZodSchema<JP>;
+
+  // extra config
   config?: IGetConfigProps;
 }
 
-interface ISchedulerReturnValue<TJobPayload, TJobResponse> {
-  receiveMessage: NextApiHandler<IReceiveMessageReturnValue<TJobResponse> | null>;
-  sendMessage: ISendMessage<TJobPayload>;
+interface ISchedulerReturnValue<JP, JR> {
+  handler: NextApiHandler<IReceiveMessageReturnValue<JR>>;
+  send: (props: ISendMessageProps<JP>) => Promise<{ messageId: string }>;
 }
 
-interface ISendMessageOptions {
-  /**
-   * The qstash publish options overrides
-   */
-  _qstashPublishOptions?: Omit<PublishJsonRequest, "body">;
+interface ISendMessageProps<JP> {
+  payload: JP;
+
+  // The qstash publish options overrides
+  qstashPublishOptions?: Omit<PublishJsonRequest, "body">;
 }
 
-interface IReceiveMessageReturnValue<TJobResponse> {
-  jobResponse?: TJobResponse;
+interface IReceiveMessageReturnValue<JR> {
+  jobResponse?: JR;
   message: string;
   error: boolean;
 }
 
-export const Scheduler = <TJobPayload, TJobResponse>(
-  job: IJob<TJobPayload, TJobResponse>,
-  options?: ISchedulerOptions<TJobPayload>
-): ISchedulerReturnValue<TJobPayload, TJobResponse> => {
+export const Scheduler = <JP, JR>(
+  props: ISchedulerProps<JP, JR>
+): ISchedulerReturnValue<JP, JR> => {
   // define these outside so that the functions below can close over it
-  const config = getConfig(options?.config);
-
-  const receiveMessagePath = options?.receiveMessagePath ?? "/api/sendEmail";
+  const config = getConfig(props.config);
 
   // receives data from Qstash
-  const receiveMessage: NextApiHandler<
-    IReceiveMessageReturnValue<TJobResponse>
-  > = async (req, res) => {
-    const payload: TJobPayload = req.body;
+  const handler: NextApiHandler<IReceiveMessageReturnValue<JR>> = async (
+    req,
+    res
+  ) => {
+    const payload: JP = req.body;
 
-    if (options?.validator) {
+    if (props?.validator) {
       try {
-        options.validator.parse(payload);
+        props.validator.parse(payload);
       } catch (err) {
         console.error(err);
         return res.status(500).json({
@@ -81,7 +76,7 @@ export const Scheduler = <TJobPayload, TJobResponse>(
 
     // run the job
     try {
-      const response = await job(payload);
+      const response = await props.job(payload);
       return res.status(200).json({
         jobResponse: response,
         message: "Job finished executing",
@@ -96,14 +91,24 @@ export const Scheduler = <TJobPayload, TJobResponse>(
     }
   };
 
-  // sends data to Qstash
-  const sendMessage: ISendMessage<TJobPayload> = async (
-    payload,
-    options = {}
-  ) => {
-    const { _qstashPublishOptions } = options;
+  // only do this when running inside a node environment
+  const wrappedHandler =
+    typeof window === "undefined"
+      ? verifySignature(handler, {
+          currentSigningKey: config.qstashCurrentSigningKey,
+          nextSigningKey: config.qstashNextSigningKey,
+        })
+      : handler;
 
-    const url = new URL(receiveMessagePath, config.baseUrl).href;
+  // sends data to Qstash
+  const send = async (
+    sendProps: ISendMessageProps<JP>
+  ): Promise<{
+    messageId: string;
+  }> => {
+    const { payload, qstashPublishOptions } = sendProps;
+
+    const url = new URL(props.route, config.baseUrl).href;
 
     // if localhost dont use qstash
     if (url.startsWith("http://localhost")) {
@@ -128,7 +133,7 @@ export const Scheduler = <TJobPayload, TJobResponse>(
     const { messageId } = await qstashClient.publishJSON({
       url,
       body: payload,
-      ..._qstashPublishOptions,
+      ...qstashPublishOptions,
     });
 
     return {
@@ -137,10 +142,7 @@ export const Scheduler = <TJobPayload, TJobResponse>(
   };
 
   return {
-    receiveMessage: verifySignature(receiveMessage, {
-      currentSigningKey: config.qstashCurrentSigningKey,
-      nextSigningKey: config.qstashNextSigningKey,
-    }),
-    sendMessage,
+    handler: wrappedHandler,
+    send,
   };
 };
