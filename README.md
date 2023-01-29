@@ -83,7 +83,7 @@ export const sendEmail = Scheduler<JobPayload, JobResponse>({
 });
 
 // this will be used by Next.js to receive HTTP requests
-export default sendEmail.handler;
+export default sendEmail.getHandler();
 
 // we need to disable body parser to let QStash do its thing and verify the raw request
 // you can read more here https://nextjs.org/docs/api-routes/request-helpers
@@ -125,7 +125,7 @@ export default function Home() {
 
 If your app is hosted on Vercel, `bunnygram` will try to guess your `baseUrl`. Otherwise if your app is deployed to another host, or you are testing on `localhost`, you should set the `baseUrl` manually in the `Scheduler` config.
 
-When on `localhost`, `bunnygram` won't send your messages to QStash. This is because there isn't any way for QStash to talk to your `localhost`. Instead `bunnygram` will forward your message directly to the API `handler` via `fetch`.
+When on `localhost`, `bunnygram` won't send your messages to QStash. This is because there isn't any way for QStash to talk to your `localhost`. Instead `bunnygram` will forward your message directly to the API handler via `fetch`.
 
 To overcome the `localhost` limitation, you can use `ngrok`, `tailscale` or other such services to open up your computer to the internet.
 
@@ -157,12 +157,12 @@ export const sendEmail = Scheduler<
 });
 ```
 
-The validator will be run inside the `handler` to make sure that the received data conforms to the expected type.
+The validator will be run inside the handler to make sure that the received data conforms to the expected type.
 
 ## How it works
 
 Conceptually, `bunnygram` is straighforward. It instantiates a Next.js API handler and another function to invoke it. It abstracts away some of the boilerplate regarding parsing request bodies, providing type safety and so on.
 
-The flow of data is as follows. The `send` function (introduced previously above) sends a `POST` request with your payload to QStash. QStash will then forward that payload by sending another `POST` request to the API `handler`. The `handler` will receive the data and run your job with it.
+The flow of data is as follows. The `send` function (introduced previously above) sends a `POST` request with your payload to QStash. QStash will then forward that payload by sending another `POST` request to the API handler. The handler will receive the data and run your job with it.
 
-What might be a little confusing is how server-side Next.js API `handler` code and its client code are colocated in the same file. But that is what makes shared typing possible in order to improve DX.
+If you look at the source code, what might be a little confusing is how server-side Next.js API handler code and its client code are colocated in the same file. But that is what makes shared typing possible in order to improve DX.
