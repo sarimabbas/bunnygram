@@ -1,26 +1,6 @@
 import { z } from "zod";
 
-export const ZRequiredConfig = z.object({
-  qstashToken: z.string({
-    description:
-      "The qstash token. We try to infer from process.env, so this is optional",
-    invalid_type_error:
-      "Did you forget to set QSTASH_TOKEN or pass it in via config?",
-    required_error:
-      "Did you forget to set QSTASH_TOKEN or pass it in via config?",
-  }),
-  qstashCurrentSigningKey: z.string({
-    invalid_type_error:
-      "Did you forget to set QSTASH_CURRENT_SIGNING_KEY or pass it in via config?",
-    required_error:
-      "Did you forget to set QSTASH_CURRENT_SIGNING_KEY or pass it in via config?",
-  }),
-  qstashNextSigningKey: z.string({
-    invalid_type_error:
-      "Did you forget to set QSTASH_NEXT_SIGNING_KEY or pass it in via config?",
-    required_error:
-      "Did you forget to set QSTASH_NEXT_SIGNING_KEY or pass it in via config?",
-  }),
+export const ZCommonConfig = z.object({
   baseUrl: z
     .string({
       invalid_type_error:
@@ -33,14 +13,49 @@ export const ZRequiredConfig = z.object({
     .url(),
 });
 
-export type IGetConfigProps = Partial<z.infer<typeof ZRequiredConfig>>;
+export const ZHandlerConfig = ZCommonConfig.extend({
+  qstashCurrentSigningKey: z.string({
+    invalid_type_error:
+      "Did you forget to set QSTASH_CURRENT_SIGNING_KEY or pass it in via config?",
+    required_error:
+      "Did you forget to set QSTASH_CURRENT_SIGNING_KEY or pass it in via config?",
+  }),
+  qstashNextSigningKey: z.string({
+    invalid_type_error:
+      "Did you forget to set QSTASH_NEXT_SIGNING_KEY or pass it in via config?",
+    required_error:
+      "Did you forget to set QSTASH_NEXT_SIGNING_KEY or pass it in via config?",
+  }),
+});
 
-export const getConfig = (props?: IGetConfigProps) => {
-  const config = ZRequiredConfig.parse({
+export const ZSendConfig = ZCommonConfig.extend({
+  qstashToken: z.string({
+    description:
+      "The qstash token. We try to infer from process.env, so this is optional",
+    invalid_type_error:
+      "Did you forget to set QSTASH_TOKEN or pass it in via config?",
+    required_error:
+      "Did you forget to set QSTASH_TOKEN or pass it in via config?",
+  }),
+});
+
+export type IGetConfigProps = Partial<
+  z.infer<typeof ZHandlerConfig & typeof ZSendConfig>
+>;
+
+export const getHandlerConfig = (props?: IGetConfigProps) => {
+  const config = ZHandlerConfig.parse({
     baseUrl: getBaseUrl(props),
-    qstashToken: getToken(props),
     qstashCurrentSigningKey: getCurrentSigningKey(props),
     qstashNextSigningKey: getNextSigningKey(props),
+  });
+  return config;
+};
+
+export const getSendConfig = (props?: IGetConfigProps) => {
+  const config = ZSendConfig.parse({
+    baseUrl: getBaseUrl(props),
+    qstashToken: getToken(props),
   });
   return config;
 };
@@ -75,12 +90,4 @@ export const getCurrentSigningKey = (props?: IGetConfigProps) => {
 
 export const getNextSigningKey = (props?: IGetConfigProps) => {
   return props?.qstashNextSigningKey ?? process.env.QSTASH_NEXT_SIGNING_KEY;
-};
-
-export const getApiRoutePath = (filename: string) => {
-  const x = filename.split("/");
-  const y = x.slice(x.indexOf("api")).join("/");
-  const z = y.split(".");
-  z.pop();
-  return z.join(".");
 };

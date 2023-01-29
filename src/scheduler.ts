@@ -2,7 +2,7 @@ import { Client, PublishJsonRequest } from "@upstash/qstash";
 import { verifySignature } from "@upstash/qstash/nextjs";
 import type { NextApiHandler } from "next";
 import { z } from "zod";
-import { getConfig, IGetConfigProps } from "./config";
+import { getHandlerConfig, getSendConfig, IGetConfigProps } from "./config";
 import { getBodyFromRawRequest, IErrorResponse } from "./utils";
 
 // generics key
@@ -47,7 +47,7 @@ interface ISchedulerReturnValue<JP, JR> {
   /**
    * NextJS API handler that should be default exported inside `api` directory
    */
-  handler: NextApiHandler<IReceiveMessageReturnValue<JR>>;
+  getHandler: () => NextApiHandler<IReceiveMessageReturnValue<JR>>;
 
   /**
    * send a message to the scheduler. can be called in both client and
@@ -95,79 +95,84 @@ interface IReceiveMessageReturnValue<JR> extends IErrorResponse {
 export const Scheduler = <JP, JR>(
   props: ISchedulerProps<JP, JR>
 ): ISchedulerReturnValue<JP, JR> => {
-  // define these outside so that the functions below can close over it
-  const config = getConfig(props.config);
-
-  const isLocalhost = config.baseUrl.startsWith("http://localhost");
-
   /**
-   * Receives incoming payload from QStash (or directly from `send()` via
-   * `fetch` if on `localhost`). Then, parses the payload and uses it to run the
-   * user-defined job.
-   * @param req - HTTP request object
-   * @param res - HTTP response object
-   * @returns a NextJS API handler
+   * `getHandler` returns a NextJS API handler that should be default exported inside `api` directory
    */
-  const handler: NextApiHandler<IReceiveMessageReturnValue<JR>> = async (
-    req,
-    res
-  ) => {
-    if (req.method !== "POST") {
-      return res.status(405).json({
-        message: "Only POST requests allowed",
-        error: true,
-      });
-    }
+  const getHandler = (): NextApiHandler<IReceiveMessageReturnValue<JR>> => {
+    const config = getHandlerConfig(props.config);
+    const isLocalhost = config.baseUrl.startsWith("http://localhost");
 
-    // when localhost, verifySignature won't wrap the handler, but bodyParsing
-    // is disabled, so we need to parse ourselves. When not localhost,
-    // verifySignature wraps the handler and also modifies the req to add body,
-    // so we don't need to parse
-    const payload: JP = isLocalhost
-      ? await getBodyFromRawRequest(req)
-      : req.body;
-
-    if (props?.validator) {
-      try {
-        props.validator.parse(payload);
-      } catch (err) {
-        console.error(err);
-        return res.status(500).json({
-          message:
-            err instanceof Error
-              ? err.message
-              : "Failed to validate request payload",
+    /**
+     * Receives incoming payload from QStash (or directly from `send()` via
+     * `fetch` if on `localhost`). Then, parses the payload and uses it to run the
+     * user-defined job.
+     * @param req - HTTP request object
+     * @param res - HTTP response object
+     * @returns a NextJS API handler
+     */
+    const handler: NextApiHandler<IReceiveMessageReturnValue<JR>> = async (
+      req,
+      res
+    ) => {
+      if (req.method !== "POST") {
+        return res.status(405).json({
+          message: "Only POST requests allowed",
           error: true,
         });
       }
-    }
 
-    // run the job
-    try {
-      const response = await props.job(payload);
-      return res.status(200).json({
-        jobResponse: response,
-        message: "Job finished executing",
-        error: false,
-      });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({
-        message: err instanceof Error ? err.message : "Job failed to execute",
-        error: true,
-      });
-    }
+      // when localhost, verifySignature won't wrap the handler, but bodyParsing
+      // is disabled, so we need to parse ourselves. When not localhost,
+      // verifySignature wraps the handler and also modifies the req to add body,
+      // so we don't need to parse
+      const payload: JP = isLocalhost
+        ? await getBodyFromRawRequest(req)
+        : req.body;
+
+      if (props?.validator) {
+        try {
+          props.validator.parse(payload);
+        } catch (err) {
+          console.error(err);
+          return res.status(500).json({
+            message:
+              err instanceof Error
+                ? err.message
+                : "Failed to validate request payload",
+            error: true,
+          });
+        }
+      }
+
+      // run the job
+      try {
+        const response = await props.job(payload);
+        return res.status(200).json({
+          jobResponse: response,
+          message: "Job finished executing",
+          error: false,
+        });
+      } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+          message: err instanceof Error ? err.message : "Job failed to execute",
+          error: true,
+        });
+      }
+    };
+
+    // only do this when running inside a node environment
+    // this is because verifySignature relies on crypto
+    const wrappedHandler =
+      typeof window === "undefined" && !isLocalhost
+        ? verifySignature(handler, {
+            currentSigningKey: config.qstashCurrentSigningKey,
+            nextSigningKey: config.qstashNextSigningKey,
+          })
+        : handler;
+
+    return wrappedHandler;
   };
-
-  // only do this when running inside a node environment
-  // this is because verifySignature relies on crypto
-  const wrappedHandler =
-    typeof window === "undefined" && !isLocalhost
-      ? verifySignature(handler, {
-          currentSigningKey: config.qstashCurrentSigningKey,
-          nextSigningKey: config.qstashNextSigningKey,
-        })
-      : handler;
 
   /**
    * Sends message to `handler` using QStash as the intermediary. If on
@@ -181,6 +186,8 @@ export const Scheduler = <JP, JR>(
   ): Promise<ISendMessageReturnValue> => {
     const { payload, qstashOptions } = sendProps;
 
+    const config = getSendConfig(props.config);
+    const isLocalhost = config.baseUrl.startsWith("http://localhost");
     const url = new URL(props.route, config.baseUrl).href;
 
     // if localhost dont use qstash
@@ -227,7 +234,7 @@ export const Scheduler = <JP, JR>(
   };
 
   return {
-    handler: wrappedHandler,
+    getHandler,
     send,
   };
 };

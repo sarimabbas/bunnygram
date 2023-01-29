@@ -1,8 +1,6 @@
 import { test, expect, vi } from "vitest";
 import {
-  getApiRoutePath,
   getBaseUrl,
-  getConfig,
   getCurrentSigningKey,
   getNextSigningKey,
   getToken,
@@ -61,37 +59,4 @@ test("getNextSigningKey with env and override", () => {
     qstashNextSigningKey: "1234",
   });
   expect(nextSigningKey).toBe("1234");
-});
-
-test("getApiRoutePath", () => {
-  expect(
-    getApiRoutePath("/Users/johndoe/Developer/app/api/send-email.ts")
-  ).toBe("api/send-email");
-
-  expect(getApiRoutePath("/Users/johndoe/hello/world/sample.ts")).toBe(
-    "sample"
-  );
-});
-
-test("getConfig with valid overrides set", () => {
-  const config = getConfig({
-    baseUrl: "http://localhost:2000",
-    qstashCurrentSigningKey: "1234",
-    qstashNextSigningKey: "5678",
-    qstashToken: "abcd",
-  });
-  expect(config).toStrictEqual({
-    baseUrl: "http://localhost:2000",
-    qstashCurrentSigningKey: "1234",
-    qstashNextSigningKey: "5678",
-    qstashToken: "abcd",
-  });
-});
-
-test("getConfig with invalid overrides set", () => {
-  expect(() => {
-    getConfig({
-      baseUrl: "localhost",
-    });
-  }).toThrow();
 });
