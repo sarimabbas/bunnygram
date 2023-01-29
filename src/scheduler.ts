@@ -3,6 +3,7 @@ import { verifySignature } from "@upstash/qstash/nextjs";
 import type { NextApiHandler } from "next";
 import { z } from "zod";
 import { getConfig, IGetConfigProps } from "./config";
+import { getBodyFromRawRequest } from "./utils";
 
 // generics key
 // JP: JobPayload
@@ -52,12 +53,29 @@ export const Scheduler = <JP, JR>(
   // define these outside so that the functions below can close over it
   const config = getConfig(props.config);
 
+  const isLocalhost = config.baseUrl.startsWith("http://localhost");
+
   // receives data from Qstash
   const handler: NextApiHandler<IReceiveMessageReturnValue<JR>> = async (
     req,
     res
   ) => {
-    const payload: JP = req.body;
+    if (req.method !== "POST") {
+      return res.status(405).json({
+        message: "Only POST requests allowed",
+        error: true,
+      });
+    }
+
+    // when localhost, verifySignature won't wrap the handler, but bodyParsing
+    // is disabled, so we need to parse ourselves. When not localhost,
+    // verifySignature wraps the handler and also modifies the req to add body,
+    // so we don't need to parse
+    const payload: JP = isLocalhost
+      ? await getBodyFromRawRequest(req)
+      : req.body;
+
+    console.log({ payload });
 
     if (props?.validator) {
       try {
@@ -93,7 +111,7 @@ export const Scheduler = <JP, JR>(
 
   // only do this when running inside a node environment
   const wrappedHandler =
-    typeof window === "undefined"
+    typeof window === "undefined" && !isLocalhost
       ? verifySignature(handler, {
           currentSigningKey: config.qstashCurrentSigningKey,
           nextSigningKey: config.qstashNextSigningKey,
@@ -111,14 +129,21 @@ export const Scheduler = <JP, JR>(
     const url = new URL(props.route, config.baseUrl).href;
 
     // if localhost dont use qstash
-    if (url.startsWith("http://localhost")) {
-      await fetch(url, {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+    if (isLocalhost) {
+      try {
+        await fetch(url, {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      } catch (err) {
+        console.error(err);
+        return {
+          messageId: "error",
+        };
+      }
       return {
         messageId: "localhost",
       };
