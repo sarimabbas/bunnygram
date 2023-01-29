@@ -56,8 +56,7 @@ export const Scheduler = <TJobPayload, TJobResponse>(
   // define these outside so that the functions below can close over it
   const config = getConfig(options?.config);
 
-  const receiveMessagePath =
-    options?.receiveMessagePath ?? getApiRoutePath(__filename);
+  const receiveMessagePath = options?.receiveMessagePath ?? "/api/sendEmail";
 
   // receives data from Qstash
   const receiveMessage: NextApiHandler<
@@ -108,7 +107,7 @@ export const Scheduler = <TJobPayload, TJobResponse>(
 
     // if localhost dont use qstash
     if (url.startsWith("http://localhost")) {
-      const resp = await fetch(url, {
+      await fetch(url, {
         method: "POST",
         body: JSON.stringify(payload),
         headers: {
