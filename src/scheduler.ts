@@ -11,7 +11,10 @@ type IJob<TJobPayload, TJobResponse> = (
 type ISendMessage<TJobPayload> = (
   payload: TJobPayload,
   options?: ISendMessageOptions
-) => Promise<void>;
+) => Promise<{
+  // sent back from QStash when a message is queued
+  messageId: string;
+}>;
 
 interface ISchedulerOptions<TJobPayload> {
   /**
@@ -112,8 +115,9 @@ export const Scheduler = <TJobPayload, TJobResponse>(
           "Content-Type": "application/json",
         },
       });
-      console.log({ resp });
-      return;
+      return {
+        messageId: "localhost",
+      };
     }
 
     // send to qstash
@@ -122,11 +126,15 @@ export const Scheduler = <TJobPayload, TJobResponse>(
     });
 
     // enqueue the job
-    await qstashClient.publishJSON({
+    const { messageId } = await qstashClient.publishJSON({
       url,
       body: payload,
       ..._qstashPublishOptions,
     });
+
+    return {
+      messageId,
+    };
   };
 
   return {
