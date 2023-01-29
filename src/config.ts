@@ -39,11 +39,11 @@ export const ZSendConfig = ZCommonConfig.extend({
   }),
 });
 
-export type IGetConfigProps = Partial<
-  z.infer<typeof ZHandlerConfig & typeof ZSendConfig>
+export type IConfigProps = Partial<
+  z.infer<typeof ZHandlerConfig> & z.infer<typeof ZSendConfig>
 >;
 
-export const getHandlerConfig = (props?: IGetConfigProps) => {
+export const getHandlerConfig = (props?: IConfigProps) => {
   const config = ZHandlerConfig.parse({
     baseUrl: getBaseUrl(props),
     qstashCurrentSigningKey: getCurrentSigningKey(props),
@@ -52,7 +52,7 @@ export const getHandlerConfig = (props?: IGetConfigProps) => {
   return config;
 };
 
-export const getSendConfig = (props?: IGetConfigProps) => {
+export const getSendConfig = (props?: IConfigProps) => {
   const config = ZSendConfig.parse({
     baseUrl: getBaseUrl(props),
     qstashToken: getToken(props),
@@ -60,7 +60,7 @@ export const getSendConfig = (props?: IGetConfigProps) => {
   return config;
 };
 
-export const getBaseUrl = (props?: IGetConfigProps) => {
+export const getBaseUrl = (props?: IConfigProps) => {
   if (props?.baseUrl) {
     return props.baseUrl;
   }
@@ -74,7 +74,7 @@ export const getBaseUrl = (props?: IGetConfigProps) => {
   }
 };
 
-export const getToken = (props?: IGetConfigProps) => {
+export const getToken = (props?: IConfigProps) => {
   return (
     props?.qstashToken ??
     process.env.QSTASH_TOKEN ??
@@ -82,12 +82,12 @@ export const getToken = (props?: IGetConfigProps) => {
   );
 };
 
-export const getCurrentSigningKey = (props?: IGetConfigProps) => {
+export const getCurrentSigningKey = (props?: IConfigProps) => {
   return (
     props?.qstashCurrentSigningKey ?? process.env.QSTASH_CURRENT_SIGNING_KEY
   );
 };
 
-export const getNextSigningKey = (props?: IGetConfigProps) => {
+export const getNextSigningKey = (props?: IConfigProps) => {
   return props?.qstashNextSigningKey ?? process.env.QSTASH_NEXT_SIGNING_KEY;
 };

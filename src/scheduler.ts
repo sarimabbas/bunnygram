@@ -2,8 +2,8 @@ import { Client, PublishJsonRequest } from "@upstash/qstash";
 import { verifySignature } from "@upstash/qstash/nextjs";
 import type { NextApiHandler } from "next";
 import { z } from "zod";
-import { getHandlerConfig, getSendConfig, IGetConfigProps } from "./config";
-import { getBodyFromRawRequest, IErrorResponse } from "./utils";
+import { getHandlerConfig, getSendConfig, IConfigProps } from "./config";
+import { getBodyFromRawRequest, IErrorResponse, isBrowser } from "./utils";
 
 // generics key
 // JP: JobPayload
@@ -37,7 +37,7 @@ interface ISchedulerProps<JP, JR> {
   /**
    * extra config
    */
-  config?: IGetConfigProps;
+  config?: IConfigProps;
 }
 
 /**
@@ -99,6 +99,11 @@ export const Scheduler = <JP, JR>(
    * `getHandler` returns a NextJS API handler that should be default exported inside `api` directory
    */
   const getHandler = (): NextApiHandler<IReceiveMessageReturnValue<JR>> => {
+    // evaluating this code in the browser is a no-op
+    if (isBrowser()) {
+      return () => {};
+    }
+
     const config = getHandlerConfig(props.config);
     const isLocalhost = config.baseUrl.startsWith("http://localhost");
 
@@ -163,13 +168,12 @@ export const Scheduler = <JP, JR>(
 
     // only do this when running inside a node environment
     // this is because verifySignature relies on crypto
-    const wrappedHandler =
-      typeof window === "undefined" && !isLocalhost
-        ? verifySignature(handler, {
-            currentSigningKey: config.qstashCurrentSigningKey,
-            nextSigningKey: config.qstashNextSigningKey,
-          })
-        : handler;
+    const wrappedHandler = isLocalhost
+      ? handler
+      : verifySignature(handler, {
+          currentSigningKey: config.qstashCurrentSigningKey,
+          nextSigningKey: config.qstashNextSigningKey,
+        });
 
     return wrappedHandler;
   };
