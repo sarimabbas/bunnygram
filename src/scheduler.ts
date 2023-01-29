@@ -57,7 +57,7 @@ interface ISchedulerReturnValue<JP, JR> {
 }
 
 /**
- * The input of the `send()` function
+ * The input to the `send()` function
  */
 interface ISendMessageProps<JP> {
   /**
