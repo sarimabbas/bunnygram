@@ -70,7 +70,7 @@ export const Scheduler = <TJobPayload, TJobResponse>(
         options.validator.parse(payload);
       } catch (err) {
         console.error(err);
-        res.status(500).json({
+        return res.status(500).json({
           message:
             err instanceof Error
               ? err.message
@@ -83,14 +83,14 @@ export const Scheduler = <TJobPayload, TJobResponse>(
     // run the job
     try {
       const response = await job(payload);
-      res.status(200).json({
+      return res.status(200).json({
         jobResponse: response,
         message: "Job finished executing",
         error: false,
       });
     } catch (err) {
       console.error(err);
-      res.status(500).json({
+      return res.status(500).json({
         message: err instanceof Error ? err.message : "Job failed to execute",
         error: true,
       });
