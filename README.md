@@ -5,6 +5,9 @@
   - [Installation](#installation)
   - [Requirements](#requirements)
   - [Get started](#get-started)
+  - [Other concepts](#other-concepts)
+    - [`baseUrl`](#baseurl)
+    - [Payload validation with Zod](#payload-validation-with-zod)
   - [How it works](#how-it-works)
 
 ## Introduction
@@ -115,6 +118,46 @@ export default function Home() {
   return <button onClick={runJob}>Send email</button>;
 }
 ```
+
+## Other concepts
+
+### `baseUrl`
+
+If your app is hosted on Vercel, `bunnygram` will try to guess your `baseUrl`. Otherwise if your app is deployed to another host, or you are testing on `localhost`, you should set the `baseUrl` manually in the `Scheduler` config.
+
+When on `localhost`, `bunnygram` won't send your messages to QStash. This is because there isn't any way for QStash to talk to your `localhost`. Instead `bunnygram` will forward your message directly to the API `handler` via `fetch`.
+
+To overcome the `localhost` limitation, you can use `ngrok`, `tailscale` or other such services to open up your computer to the internet.
+
+### Payload validation with Zod
+
+You can add runtime type safety by providing a validator to the `Scheduler` config, like this:
+
+```ts
+// pages/api/send-email.ts
+
+import { z } from "zod";
+
+const JobPayloadSchema = z.object({
+  emailAddress: z.string(),
+  emailBody: z.string(),
+});
+
+interface JobResponse {
+  status: boolean;
+}
+
+export const sendEmail = Scheduler<
+  z.infer<typeof JobPayloadSchema>,
+  JobResponse
+>({
+  route: "/api/send-email",
+  job: // () => {},
+  validator: JobPayloadSchema,
+});
+```
+
+The validator will be run inside the `handler` to make sure that the received data conforms to the expected type.
 
 ## How it works
 
