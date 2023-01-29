@@ -1,19 +1,36 @@
 import { z } from "zod";
 
 export const ZRequiredConfig = z.object({
-  qstashToken: z
-    .string()
-    .describe(
-      "The qstash token. We try to infer from process.env, so this is optional"
-    ),
-  qstashCurrentSigningKey: z.string(),
-  qstashNextSigningKey: z.string(),
+  qstashToken: z.string({
+    description:
+      "The qstash token. We try to infer from process.env, so this is optional",
+    invalid_type_error:
+      "Did you forget to set QSTASH_TOKEN or pass it in via config?",
+    required_error:
+      "Did you forget to set QSTASH_TOKEN or pass it in via config?",
+  }),
+  qstashCurrentSigningKey: z.string({
+    invalid_type_error:
+      "Did you forget to set QSTASH_CURRENT_SIGNING_KEY or pass it in via config?",
+    required_error:
+      "Did you forget to set QSTASH_CURRENT_SIGNING_KEY or pass it in via config?",
+  }),
+  qstashNextSigningKey: z.string({
+    invalid_type_error:
+      "Did you forget to set QSTASH_NEXT_SIGNING_KEY or pass it in via config?",
+    required_error:
+      "Did you forget to set QSTASH_NEXT_SIGNING_KEY or pass it in via config?",
+  }),
   baseUrl: z
-    .string()
-    .url()
-    .describe(
-      "Where the scheduler can be reached. We try to infer, so this is optional"
-    ),
+    .string({
+      invalid_type_error:
+        "We couldn't figure out a baseUrl for your app. Maybe try passing it via config e.g. https://example.com",
+      required_error:
+        "We couldn't figure out a baseUrl for your app. Maybe try passing it via config e.g. https://example.com",
+      description:
+        "Where the scheduler can be reached. We try to infer, so this is optional",
+    })
+    .url(),
 });
 
 export type IGetConfigProps = Partial<z.infer<typeof ZRequiredConfig>>;
