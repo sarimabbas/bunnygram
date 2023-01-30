@@ -195,4 +195,5 @@ I would appreciate PRs that:
 
 - Add more tests, particularly those mocking the HTTP request
 - Help make `bunnygram` agnostic to QStash and add support for other "adapters" e.g. Zeplo.
+- Improve type inference when there are no user provided types for job payload and response
 - Anything else!
