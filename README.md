@@ -5,9 +5,9 @@
   - [Installation](#installation)
   - [Requirements](#requirements)
   - [Get started](#get-started)
-    - [Step 1: Put your scheduler definition somewhere e.g. `tasks/send-email.ts`.](#step-1-put-your-scheduler-definition-somewhere-eg-taskssend-emailts)
+    - [Step 1: Define the scheduler](#step-1-define-the-scheduler)
     - [Step 2: Set up a Next.js API route](#step-2-set-up-a-nextjs-api-route)
-    - [Step 3: Send a message to the receiver from anywhere else inside our Next.js app](#step-3-send-a-message-to-the-receiver-from-anywhere-else-inside-our-nextjs-app)
+    - [Step 3: Send a message](#step-3-send-a-message)
   - [Other concepts](#other-concepts)
     - [`baseUrl`](#baseurl)
     - [Payload validation with Zod](#payload-validation-with-zod)
@@ -52,7 +52,9 @@ You can learn more about the `Scheduler` function below.
 
 ## Get started
 
-### Step 1: Put your scheduler definition somewhere e.g. `tasks/send-email.ts`.
+### Step 1: Define the scheduler
+
+Put your scheduler definition somewhere e.g. `tasks/send-email.ts`:
 
 ```ts
 // tasks/send-email.ts
@@ -114,7 +116,9 @@ export const config = {
 };
 ```
 
-### Step 3: Send a message to the receiver from anywhere else inside our Next.js app
+### Step 3: Send a message
+
+Send a message to the receiver from anywhere else inside our Next.js app:
 
 ```tsx
 // src/pages/index.tsx
