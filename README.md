@@ -15,7 +15,7 @@
 
 `bunnygram` is a wrapper around QStash, an HTTP message queue and task scheduler. With QStash, you get retries, delays, cron, content deduplication and more. You can read more about QStash here: <https://docs.upstash.com/qstash>.
 
-`bunnygram` reduces boilerplate and makes it easier to use QStash in your Next.js apps. It borrows from patterns introduced by a similar library [Quirrel](https://github.com/quirrel-dev/quirrel), which made adding job queues to Next.js more developer friendly.
+`bunnygram` reduces boilerplate and makes it easier to use QStash in your Next.js apps. It borrows from patterns introduced by a similar library [Quirrel](https://github.com/quirrel-dev/quirrel), which was one of the first to make adding job queues to Next.js more developer friendly.
 
 ## Installation
 
