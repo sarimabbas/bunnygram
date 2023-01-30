@@ -107,7 +107,7 @@ export default sendEmail.onReceive({
   },
 });
 
-// we need to disable body parser to let QStash do its thing and verify the raw request
+// we need to disable body parser in order to verify the raw request from QStash
 // you can read more here https://nextjs.org/docs/api-routes/request-helpers
 export const config = {
   api: {
