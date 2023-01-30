@@ -175,7 +175,6 @@ export const sendEmail = Scheduler<
   JobResponse
 >({
   route: "/api/send-email",
-  job: // () => {},
   validator: JobPayloadSchema,
 });
 ```
