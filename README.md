@@ -5,6 +5,9 @@
   - [Installation](#installation)
   - [Requirements](#requirements)
   - [Get started](#get-started)
+    - [Step 1: Put your scheduler definition somewhere e.g. `tasks/send-email.ts`.](#step-1-put-your-scheduler-definition-somewhere-eg-taskssend-emailts)
+    - [Step 2: Set up a Next.js API route](#step-2-set-up-a-nextjs-api-route)
+    - [Step 3: Send a message to the receiver from anywhere else inside our Next.js app](#step-3-send-a-message-to-the-receiver-from-anywhere-else-inside-our-nextjs-app)
   - [Other concepts](#other-concepts)
     - [`baseUrl`](#baseurl)
     - [Payload validation with Zod](#payload-validation-with-zod)
@@ -49,21 +52,21 @@ You can learn more about the `Scheduler` function below.
 
 ## Get started
 
-Start by creating an API route which will run your job in the background.
+### Step 1: Put your scheduler definition somewhere e.g. `tasks/send-email.ts`.
 
 ```ts
-// pages/api/send-email.ts
+// tasks/send-email.ts
+
+import { Scheduler } from "bunnygram";
 
 interface JobPayload {
   emailAddress: string;
-  emailBody: string;
 }
 
 interface JobResponse {
   status: boolean;
 }
 
-//      👇 notice the const export
 export const sendEmail = Scheduler<JobPayload, JobResponse>({
   // the path this API route will be accessible on
   route: "/api/send-email",
@@ -73,11 +76,26 @@ export const sendEmail = Scheduler<JobPayload, JobResponse>({
     baseUrl: "http://localhost:<PORT>",
   },
 });
+```
 
-// this will be used by Next.js to receive HTTP requests
+A few important things to note here:
+
+- Notice how we specify the payload and response for the job we are about to write (more on that in step 2). This allows for better intellisense.
+- We specify the API route the scheduler will be available on.
+- There is some optional config. Crucially, if you are testing on `localhost` you have to specify the `baseUrl` explicitly.
+
+### Step 2: Set up a Next.js API route
+
+```ts
+// pages/api/send-email.ts
+
+import { sendEmail } from "@/tasks/send-email";
+import { writeFile } from "fs/promises";
+
 export default sendEmail.onReceive({
   // the job to run when QStash comes knocking
-  job: async ({ emailAddress, emailBody }) => {
+  // autocomplete 👇 on the payload
+  job: async ({ emailAddress }) => {
     await mailchimp.send({
       // ... use the payload
     });
@@ -96,12 +114,12 @@ export const config = {
 };
 ```
 
-Now we can send a message to the handler from anywhere else inside our Next.js app:
+### Step 3: Send a message to the receiver from anywhere else inside our Next.js app
 
 ```tsx
 // src/pages/index.tsx
 
-import { sendEmail } from "./api/sendEmail";
+import { sendEmail } from "@/tasks/send-email";
 
 export default function Home() {
   const runJob = async () => {
@@ -109,7 +127,6 @@ export default function Home() {
       payload: {
         // 👇 you'll get autocomplete here
         emailAddress: "hello@gmail.com",
-        emailBody: "Hello world!",
       },
       qstashOptions: {
         // ... set delays, cron, deduplication etc.
