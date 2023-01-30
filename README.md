@@ -92,7 +92,7 @@ A few important things to note here:
 // pages/api/send-email.ts
 
 import { sendEmail } from "@/tasks/send-email";
-import { writeFile } from "fs/promises";
+import { mailchimp } from "example-email-api";
 
 export default sendEmail.onReceive({
   // the job to run when QStash comes knocking
