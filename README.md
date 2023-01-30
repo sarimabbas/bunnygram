@@ -67,6 +67,15 @@ interface JobResponse {
 export const sendEmail = Scheduler<JobPayload, JobResponse>({
   // the path this API route will be accessible on
   route: "/api/send-email",
+  config: {
+    // ... optional config
+    // if you're just testing on localhost, you also need to supply the baseUrl here:
+    baseUrl: "http://localhost:<PORT>",
+  },
+});
+
+// this will be used by Next.js to receive HTTP requests
+export default sendEmail.onReceive({
   // the job to run when QStash comes knocking
   job: async ({ emailAddress, emailBody }) => {
     await mailchimp.send({
@@ -76,15 +85,7 @@ export const sendEmail = Scheduler<JobPayload, JobResponse>({
       status: true,
     };
   },
-  config: {
-    // ... optional config
-    // if you're just testing on localhost, you also need to supply the baseUrl here:
-    baseUrl: "http://localhost:<PORT>",
-  },
 });
-
-// this will be used by Next.js to receive HTTP requests
-export default sendEmail.getHandler();
 
 // we need to disable body parser to let QStash do its thing and verify the raw request
 // you can read more here https://nextjs.org/docs/api-routes/request-helpers

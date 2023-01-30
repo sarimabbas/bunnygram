@@ -2,7 +2,7 @@ import { Client, PublishJsonRequest } from "@upstash/qstash";
 import { verifySignature } from "@upstash/qstash/nextjs";
 import type { NextApiHandler } from "next";
 import { z } from "zod";
-import { getHandlerConfig, getSendConfig, IConfigProps } from "./config";
+import { getReceiveConfig, getSendConfig, IConfigProps } from "./config";
 import { getBodyFromRawRequest, IErrorResponse, isBrowser } from "./utils";
 
 // generics key
@@ -10,24 +10,13 @@ import { getBodyFromRawRequest, IErrorResponse, isBrowser } from "./utils";
 // JR: JobResponse
 
 /**
- * IJob describes a job to be run
- * It takes in a payload of type JP and returns a JR
- */
-type IJob<JP, JR> = (payload: JP) => Promise<JR>;
-
-/**
  * The input to the `Scheduler()` function
  */
-interface ISchedulerProps<JP, JR> {
+interface ISchedulerProps<JP> {
   /**
    * the route it is reachable on
    */
   route: string;
-
-  /**
-   * the job to run
-   */
-  job: IJob<JP, JR>;
 
   /**
    * an optional zod validator for the incoming payload
@@ -47,7 +36,9 @@ interface ISchedulerReturnValue<JP, JR> {
   /**
    * NextJS API handler that should be default exported inside `api` directory
    */
-  getHandler: () => NextApiHandler<IReceiveMessageReturnValue<JR>>;
+  onReceive: (
+    props: IReceiveProps<JP, JR>
+  ) => NextApiHandler<IReceiveMessageReturnValue<JR>>;
 
   /**
    * send a message to the scheduler. can be called in both client and
@@ -57,11 +48,34 @@ interface ISchedulerReturnValue<JP, JR> {
 }
 
 /**
+ * The input of the `onReceive` function
+ */
+interface IReceiveProps<JP, JR> {
+  job: IJob<JP, JR>;
+}
+
+/**
+ * The response structure of the API handler. This will be seen by QStash
+ */
+interface IReceiveMessageReturnValue<JR> extends IErrorResponse {
+  /**
+   * The output of the job
+   */
+  jobResponse?: JR;
+}
+
+/**
+ * IJob describes a job to be run
+ * It takes in a payload of type JP and returns a JR
+ */
+type IJob<JP, JR> = (payload: JP) => Promise<JR>;
+
+/**
  * The input to the `send()` function
  */
 interface ISendMessageProps<JP> {
   /**
-   * the payload that will eventually reach the handler
+   * the payload that will eventually reach the receive handler
    */
   payload: JP;
 
@@ -79,32 +93,24 @@ interface ISendMessageReturnValue extends IErrorResponse {
 }
 
 /**
- * The response structure of the API handler. This will be seen by QStash
- */
-interface IReceiveMessageReturnValue<JR> extends IErrorResponse {
-  /**
-   * The output of the job
-   */
-  jobResponse?: JR;
-}
-
-/**
  * `Scheduler` sets up both a `handler` that can be used inside a NextJS API route
  * and a `send` function to invoke it
  */
 export const Scheduler = <JP, JR>(
-  props: ISchedulerProps<JP, JR>
+  props: ISchedulerProps<JP>
 ): ISchedulerReturnValue<JP, JR> => {
   /**
-   * `getHandler` returns a NextJS API handler that should be default exported inside `api` directory
+   * `onReceive` returns a NextJS API handler that should be default exported inside `api` directory
    */
-  const getHandler = (): NextApiHandler<IReceiveMessageReturnValue<JR>> => {
+  const onReceive = <JP, JR>(
+    receiveProps: IReceiveProps<JP, JR>
+  ): NextApiHandler<IReceiveMessageReturnValue<JR>> => {
     // evaluating this code in the browser is a no-op
     if (isBrowser()) {
       return () => {};
     }
 
-    const config = getHandlerConfig(props.config);
+    const config = getReceiveConfig(props.config);
     const isLocalhost = config.baseUrl.startsWith("http://localhost");
 
     /**
@@ -151,7 +157,7 @@ export const Scheduler = <JP, JR>(
 
       // run the job
       try {
-        const response = await props.job(payload);
+        const response = await receiveProps.job(payload);
         return res.status(200).json({
           jobResponse: response,
           message: "Job finished executing",
@@ -179,7 +185,7 @@ export const Scheduler = <JP, JR>(
   };
 
   /**
-   * Sends message to `handler` using QStash as the intermediary. If on
+   * Sends message to receive handler using QStash as the intermediary. If on
    * `localhost`, sends message to handler via `fetch` directly. Can be used on
    * client-side if `NEXT_PUBLIC_QSTASH_TOKEN` env var is set, or server-side if
    * `QSTASH_TOKEN` env var is set. Can be used in both situations if
@@ -238,7 +244,7 @@ export const Scheduler = <JP, JR>(
   };
 
   return {
-    getHandler,
+    onReceive,
     send,
   };
 };

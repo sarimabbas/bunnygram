@@ -13,7 +13,7 @@ export const ZCommonConfig = z.object({
     .url(),
 });
 
-export const ZHandlerConfig = ZCommonConfig.extend({
+export const ZReceiveConfig = ZCommonConfig.extend({
   qstashCurrentSigningKey: z.string({
     invalid_type_error:
       "Did you forget to set QSTASH_CURRENT_SIGNING_KEY or pass it in via config?",
@@ -40,11 +40,11 @@ export const ZSendConfig = ZCommonConfig.extend({
 });
 
 export type IConfigProps = Partial<
-  z.infer<typeof ZHandlerConfig> & z.infer<typeof ZSendConfig>
+  z.infer<typeof ZReceiveConfig> & z.infer<typeof ZSendConfig>
 >;
 
-export const getHandlerConfig = (props?: IConfigProps) => {
-  const config = ZHandlerConfig.parse({
+export const getReceiveConfig = (props?: IConfigProps) => {
+  const config = ZReceiveConfig.parse({
     baseUrl: getBaseUrl(props),
     qstashCurrentSigningKey: getCurrentSigningKey(props),
     qstashNextSigningKey: getNextSigningKey(props),
