@@ -157,7 +157,7 @@ To overcome the `localhost` limitation, you can use `ngrok`, `tailscale` or othe
 You can add runtime type safety by providing a validator to the `Scheduler` config, like this:
 
 ```ts
-// pages/api/send-email.ts
+// tasks/send-email.ts
 
 import { z } from "zod";
 
