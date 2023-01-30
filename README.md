@@ -1,6 +1,6 @@
-# Bunnygram
+# Bunnygram 🐇 📬
 
-- [Bunnygram](#bunnygram)
+- [Bunnygram 🐇 📬](#bunnygram--)
   - [Introduction](#introduction)
   - [Installation](#installation)
   - [Requirements](#requirements)
@@ -9,6 +9,7 @@
     - [`baseUrl`](#baseurl)
     - [Payload validation with Zod](#payload-validation-with-zod)
   - [How it works](#how-it-works)
+  - [Contributing](#contributing)
 
 ## Introduction
 
@@ -166,3 +167,11 @@ Conceptually, `bunnygram` is straighforward. It instantiates a Next.js API handl
 The flow of data is as follows. The `send` function (introduced previously above) sends a `POST` request with your payload to QStash. QStash will then forward that payload by sending another `POST` request to the API handler. The handler will receive the data and run your job with it.
 
 If you look at the source code, what might be a little confusing is how server-side Next.js API handler code and its client code are colocated in the same file. But that is what makes shared typing possible in order to improve DX.
+
+## Contributing
+
+I would appreciate PRs that:
+
+- Add more tests, particularly those mocking the HTTP request
+- Help make `bunnygram` agnostic to QStash and add support for other "adapters" e.g. Zeplo.
+- Anything else!
