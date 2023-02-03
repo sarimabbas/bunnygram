@@ -38,7 +38,7 @@ If your app is on `localhost` or does not have a publicly accessible URL, you ma
 ```ts
 // tasks/send-email.ts
 
-import { Scheduler, BasicAdapter } from "bunnygram";
+import { Scheduler, BasicAdapter, QStashAdapter } from "bunnygram";
 
 interface JobPayload {
   emailAddress: string;

@@ -1,0 +1,13 @@
+# FAQ
+
+### How many times can I call my job?
+
+As many times as the adapter's service allows. For e.g. QStash has their [pricing available here](https://upstash.com/#section-pricing).
+
+### How long can my job run for?
+
+Your job is run inside a Next.js API route.
+
+If you deployed your Next.js app to a "serverful" provider e.g. AWS, Render or Railway, these API routes usually don't have any hard timeout beyond that which you set.
+
+If you deployed your Next.js app to a "serverless" provider e.g. Vercel or Netlify, these API routes usually have a timeout, usually a couple of minutes. You can consult their documentation for the exact numbers.
