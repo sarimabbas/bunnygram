@@ -1,5 +1,5 @@
 import type { NextApiHandler } from "next";
-import { LocalhostAdapter } from "../adapters/localhost";
+import { BasicAdapter } from "../adapters/basic";
 import { isBrowser } from "../utilities";
 import { getRequestBody } from "../utilities/requests";
 import { getCommonConfig } from "./config";
@@ -19,7 +19,7 @@ import {
 export const Scheduler = <JP, JR>(
   props: ISchedulerProps<JP>
 ): ISchedulerReturnValue<JP, JR> => {
-  const { adapter = LocalhostAdapter() } = props;
+  const { adapter = BasicAdapter() } = props;
 
   /**
    * `onReceive` returns a NextJS API handler that should be default exported

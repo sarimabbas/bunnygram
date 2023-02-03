@@ -1,8 +1,8 @@
 import { IAdapter } from "../common";
 
-export interface ILocalhostAdapterProps {}
+export interface IBasicAdapterProps {}
 
-export const LocalhostAdapter = <JP>(): IAdapter<JP> => {
+export const BasicAdapter = <JP>(): IAdapter<JP> => {
   return {
     send: async (sendProps) => {
       const { payload, url } = sendProps;
@@ -16,14 +16,14 @@ export const LocalhostAdapter = <JP>(): IAdapter<JP> => {
         });
         return {
           error: false,
-          message: "POST to localhost succeeded",
+          message: `POST to ${url} succeeded`,
           messageId: new Date().toISOString(),
         };
       } catch (err) {
         console.error(err);
         return {
           error: true,
-          message: "POST to localhost failed",
+          message: `POST to ${url} failed`,
         };
       }
     },
