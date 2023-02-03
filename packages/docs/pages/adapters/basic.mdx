@@ -1,6 +1,6 @@
 # Basic adapter
 
-The basic adapter is the default adapter when none is specified. It is intended for testing purposes only (e.g. on `localhost`, or when your app is not hosted on a publicly accessible URL).
+The basic adapter is the **default** adapter when none is specified. It is intended for testing purposes only (e.g. on `localhost`, or when your app is not hosted on a publicly accessible URL).
 
 The basic adapter is simply a request forwarder. The `Scheduler().send()` will just make a direct `POST` request to `Scheduler().onReceive()` at the specified route.
 
