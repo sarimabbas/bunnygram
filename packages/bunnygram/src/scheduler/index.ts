@@ -95,9 +95,12 @@ export const Scheduler = <JP, JR>(
       // ----- run the job
 
       try {
-        const response = await receiveProps.job(payload);
+        const jobResponse = await receiveProps.job({
+          payload,
+          req,
+        });
         return res.status(200).json({
-          jobResponse: response,
+          jobResponse,
           message: "Job finished executing",
           error: false,
         });

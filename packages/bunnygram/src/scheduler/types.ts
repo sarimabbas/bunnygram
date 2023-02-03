@@ -1,4 +1,4 @@
-import { NextApiHandler } from "next";
+import { NextApiHandler, NextApiRequest } from "next";
 import { z } from "zod";
 import { IAdapter, IAdapterSendReturnValue } from "../adapters/common";
 import { IErrorResponse } from "../utilities";
@@ -72,7 +72,19 @@ export interface IReceiveMessageReturnValue<JR> extends IErrorResponse {
  * IJob describes a job to be run
  * It takes in a payload of type JP and returns a JR
  */
-export type IJob<JP, JR> = (payload: JP) => Promise<JR>;
+export type IJob<JP, JR> = (props: IJobProps<JP>) => Promise<JR>;
+
+interface IJobProps<JP> {
+  /**
+   * The received payload
+   */
+  payload: JP;
+
+  /**
+   * The full HTTP request
+   */
+  req: NextApiRequest;
+}
 
 /**
  * The input to the `send()` function
