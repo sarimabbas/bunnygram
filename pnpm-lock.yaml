@@ -1,32 +1,36 @@
 lockfileVersion: 5.4
 
-specifiers:
-  '@types/node': ^18.11.18
-  '@upstash/qstash': ^0.3.4
-  '@vitest/coverage-c8': ^0.28.3
-  next: ^13.1.5
-  react: ^18.2.0
-  react-dom: ^18.2.0
-  tsup: ^6.5.0
-  typescript: ^4.9.3
-  vitest: ^0.28.3
-  zod: ^3.20.2
-  zx: ^7.1.1
+importers:
 
-dependencies:
-  '@upstash/qstash': 0.3.4
-  zod: 3.20.2
+  .:
+    specifiers: {}
 
-devDependencies:
-  '@types/node': 18.11.18
-  '@vitest/coverage-c8': 0.28.3
-  next: 13.1.5_biqbaboplfbrettd7655fr4n2y
-  react: 18.2.0
-  react-dom: 18.2.0_react@18.2.0
-  tsup: 6.5.0_typescript@4.9.4
-  typescript: 4.9.4
-  vitest: 0.28.3
-  zx: 7.1.1
+  packages/bunnygram:
+    specifiers:
+      '@types/node': ^18.11.18
+      '@upstash/qstash': ^0.3.4
+      '@vitest/coverage-c8': ^0.28.3
+      next: ^13.1.5
+      react: ^18.2.0
+      react-dom: ^18.2.0
+      tsup: ^6.5.0
+      typescript: ^4.9.3
+      vitest: ^0.28.3
+      zod: ^3.20.2
+      zx: ^7.1.1
+    dependencies:
+      '@upstash/qstash': 0.3.4
+      zod: 3.20.2
+    devDependencies:
+      '@types/node': 18.11.18
+      '@vitest/coverage-c8': 0.28.3
+      next: 13.1.5_biqbaboplfbrettd7655fr4n2y
+      react: 18.2.0
+      react-dom: 18.2.0_react@18.2.0
+      tsup: 6.5.0_typescript@4.9.4
+      typescript: 4.9.4
+      vitest: 0.28.3
+      zx: 7.1.1
 
 packages:
 
