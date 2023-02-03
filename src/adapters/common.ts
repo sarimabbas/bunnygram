@@ -1,5 +1,5 @@
 import { NextApiRequest } from "next";
-import { IErrorResponse } from "../utils";
+import { IErrorResponse } from "../utilities";
 
 // adapter
 

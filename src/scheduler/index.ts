@@ -1,9 +1,14 @@
-import { Client, PublishJsonRequest } from "@upstash/qstash";
-import { verifySignature } from "@upstash/qstash/nextjs";
 import type { NextApiHandler } from "next";
 import { z } from "zod";
-import { getReceiveConfig, getSendConfig, IConfigProps } from "./config";
-import { getBodyFromRawRequest, IErrorResponse, isBrowser } from "./utils";
+import {
+  IAdapter,
+  IAdapterSendProps,
+  IAdapterSendReturnValue,
+} from "../adapters/common";
+import { LocalhostAdapter } from "../adapters/localhost";
+import { getCommonConfig, ICommonConfigProps } from "./config";
+import { getRequestBody } from "../utilities/requests";
+import { IErrorResponse, isBrowser } from "../utilities";
 
 // generics key
 // JP: JobPayload
@@ -26,7 +31,12 @@ interface ISchedulerProps<JP> {
   /**
    * extra config
    */
-  config?: IConfigProps;
+  config?: ICommonConfigProps;
+
+  /**
+   * Which adapter to use
+   */
+  adapter?: IAdapter<JP>;
 }
 
 /**
@@ -73,24 +83,12 @@ type IJob<JP, JR> = (payload: JP) => Promise<JR>;
 /**
  * The input to the `send()` function
  */
-interface ISendMessageProps<JP> {
-  /**
-   * the payload that will eventually reach the receive handler
-   */
-  payload: JP;
-
-  /**
-   * override the qstash.publishJSON method
-   */
-  qstashOptions?: Omit<PublishJsonRequest, "body">;
-}
+interface ISendMessageProps<JP> extends IAdapterSendProps<JP> {}
 
 /**
  * The output of the `send()` function
  */
-interface ISendMessageReturnValue extends IErrorResponse {
-  messageId?: string;
-}
+interface ISendMessageReturnValue extends IAdapterSendReturnValue {}
 
 /**
  * `Scheduler` sets up both a `handler` that can be used inside a NextJS API route
@@ -99,6 +97,8 @@ interface ISendMessageReturnValue extends IErrorResponse {
 export const Scheduler = <JP, JR>(
   props: ISchedulerProps<JP>
 ): ISchedulerReturnValue<JP, JR> => {
+  const { adapter = LocalhostAdapter() } = props;
+
   /**
    * `onReceive` returns a NextJS API handler that should be default exported inside `api` directory
    */
@@ -109,9 +109,6 @@ export const Scheduler = <JP, JR>(
     if (isBrowser()) {
       return () => {};
     }
-
-    const config = getReceiveConfig(props.config);
-    const isLocalhost = config.baseUrl.startsWith("http://localhost");
 
     /**
      * Receives incoming payload from QStash (or directly from `send()` via
@@ -125,6 +122,8 @@ export const Scheduler = <JP, JR>(
       req,
       res
     ) => {
+      // ----- check request method
+
       if (req.method !== "POST") {
         return res.status(405).json({
           message: "Only POST requests allowed",
@@ -132,13 +131,29 @@ export const Scheduler = <JP, JR>(
         });
       }
 
-      // when localhost, verifySignature won't wrap the handler, but bodyParsing
-      // is disabled, so we need to parse ourselves. When not localhost,
-      // verifySignature wraps the handler and also modifies the req to add body,
-      // so we don't need to parse
-      const payload: JP = isLocalhost
-        ? await getBodyFromRawRequest(req)
-        : req.body;
+      // ----- get the parsed and raw body from the request
+
+      const { parsedBody, rawBody } = await getRequestBody(req);
+
+      req.body = parsedBody;
+
+      // ----- verify the request
+
+      const verification = await adapter.verify({
+        req,
+        rawBody,
+      });
+      if (!verification.verified) {
+        return res.status(500).json({
+          message:
+            verification.message ?? "Bunnygram: could not verify request",
+          error: true,
+        });
+      }
+
+      // ----- validate the payload
+
+      const payload: JP = parsedBody;
 
       if (props?.validator) {
         try {
@@ -155,7 +170,8 @@ export const Scheduler = <JP, JR>(
         }
       }
 
-      // run the job
+      // ----- run the job
+
       try {
         const response = await receiveProps.job(payload);
         return res.status(200).json({
@@ -172,16 +188,7 @@ export const Scheduler = <JP, JR>(
       }
     };
 
-    // only do this when running inside a node environment
-    // this is because verifySignature relies on crypto
-    const wrappedHandler = isLocalhost
-      ? handler
-      : verifySignature(handler, {
-          currentSigningKey: config.qstashCurrentSigningKey,
-          nextSigningKey: config.qstashNextSigningKey,
-        });
-
-    return wrappedHandler;
+    return handler;
   };
 
   /**
@@ -194,53 +201,17 @@ export const Scheduler = <JP, JR>(
   const send = async (
     sendProps: ISendMessageProps<JP>
   ): Promise<ISendMessageReturnValue> => {
-    const { payload, qstashOptions } = sendProps;
+    const { payload } = sendProps;
 
-    const config = getSendConfig(props.config);
-    const isLocalhost = config.baseUrl.startsWith("http://localhost");
+    const config = getCommonConfig(props.config);
     const url = new URL(props.route, config.baseUrl).href;
 
-    // if localhost dont use qstash
-    if (isLocalhost) {
-      try {
-        await fetch(url, {
-          method: "POST",
-          body: JSON.stringify(payload),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        return {
-          error: false,
-          message: "POST to localhost succeeded",
-          messageId: "localhost",
-        };
-      } catch (err) {
-        console.error(err);
-        return {
-          error: true,
-          message: "POST to localhost failed",
-        };
-      }
-    }
-
-    // send to qstash
-    const qstashClient = new Client({
-      token: config.qstashToken,
-    });
-
-    // enqueue the job
-    const { messageId } = await qstashClient.publishJSON({
+    const response = await adapter.send({
+      payload,
       url,
-      body: payload,
-      ...qstashOptions,
     });
 
-    return {
-      error: false,
-      message: "POST to QStash succeeded",
-      messageId,
-    };
+    return response;
   };
 
   return {

@@ -45,7 +45,7 @@ export const getQStashVerifyConfig = (props?: IQStashConfig) => {
   return config;
 };
 
-const getToken = (props?: IQStashConfig) => {
+export const getToken = (props?: IQStashConfig) => {
   return (
     props?.qstashToken ??
     process.env.QSTASH_TOKEN ??
@@ -53,12 +53,12 @@ const getToken = (props?: IQStashConfig) => {
   );
 };
 
-const getCurrentSigningKey = (props?: IQStashConfig) => {
+export const getCurrentSigningKey = (props?: IQStashConfig) => {
   return (
     props?.qstashCurrentSigningKey ?? process.env.QSTASH_CURRENT_SIGNING_KEY
   );
 };
 
-const getNextSigningKey = (props?: IQStashConfig) => {
+export const getNextSigningKey = (props?: IQStashConfig) => {
   return props?.qstashNextSigningKey ?? process.env.QSTASH_NEXT_SIGNING_KEY;
 };
