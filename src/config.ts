@@ -13,54 +13,16 @@ export const ZCommonConfig = z.object({
     .url(),
 });
 
-export const ZReceiveConfig = ZCommonConfig.extend({
-  qstashCurrentSigningKey: z.string({
-    invalid_type_error:
-      "Did you forget to set QSTASH_CURRENT_SIGNING_KEY or pass it in via config?",
-    required_error:
-      "Did you forget to set QSTASH_CURRENT_SIGNING_KEY or pass it in via config?",
-  }),
-  qstashNextSigningKey: z.string({
-    invalid_type_error:
-      "Did you forget to set QSTASH_NEXT_SIGNING_KEY or pass it in via config?",
-    required_error:
-      "Did you forget to set QSTASH_NEXT_SIGNING_KEY or pass it in via config?",
-  }),
-});
+export type ICommonConfigProps = Partial<z.infer<typeof ZCommonConfig>>;
 
-export const ZSendConfig = ZCommonConfig.extend({
-  qstashToken: z.string({
-    description:
-      "The qstash token. We try to infer from process.env, so this is optional",
-    invalid_type_error:
-      "Did you forget to set QSTASH_TOKEN or pass it in via config?",
-    required_error:
-      "Did you forget to set QSTASH_TOKEN or pass it in via config?",
-  }),
-});
-
-export type IConfigProps = Partial<
-  z.infer<typeof ZReceiveConfig> & z.infer<typeof ZSendConfig>
->;
-
-export const getReceiveConfig = (props?: IConfigProps) => {
-  const config = ZReceiveConfig.parse({
+export const getCommonConfig = (props?: ICommonConfigProps) => {
+  const config = ZCommonConfig.parse({
     baseUrl: getBaseUrl(props),
-    qstashCurrentSigningKey: getCurrentSigningKey(props),
-    qstashNextSigningKey: getNextSigningKey(props),
   });
   return config;
 };
 
-export const getSendConfig = (props?: IConfigProps) => {
-  const config = ZSendConfig.parse({
-    baseUrl: getBaseUrl(props),
-    qstashToken: getToken(props),
-  });
-  return config;
-};
-
-export const getBaseUrl = (props?: IConfigProps) => {
+export const getBaseUrl = (props?: ICommonConfigProps) => {
   if (props?.baseUrl) {
     return props.baseUrl;
   }
@@ -72,22 +34,4 @@ export const getBaseUrl = (props?: IConfigProps) => {
   if (process.env.NEXT_PUBLIC_VERCEL_URL) {
     return `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`;
   }
-};
-
-export const getToken = (props?: IConfigProps) => {
-  return (
-    props?.qstashToken ??
-    process.env.QSTASH_TOKEN ??
-    process.env.NEXT_PUBLIC_QSTASH_TOKEN
-  );
-};
-
-export const getCurrentSigningKey = (props?: IConfigProps) => {
-  return (
-    props?.qstashCurrentSigningKey ?? process.env.QSTASH_CURRENT_SIGNING_KEY
-  );
-};
-
-export const getNextSigningKey = (props?: IConfigProps) => {
-  return props?.qstashNextSigningKey ?? process.env.QSTASH_NEXT_SIGNING_KEY;
 };
