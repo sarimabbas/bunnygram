@@ -4,10 +4,14 @@ import { IErrorResponse } from "../utilities";
 // ----- adapter
 
 export interface IAdapter<JP> {
-  // verifies the signature of the incoming request
+  /**
+   * Verifies the signature of the incoming request
+   */
   verify: IAdapterVerify;
 
-  // Sends the payload to the backend
+  /**
+   * Sends the payload to the backend
+   */
   send: IAdapterSend<JP>;
 }
 

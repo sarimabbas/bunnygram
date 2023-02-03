@@ -1,0 +1,37 @@
+# Make your own
+
+Making your own adapter is straightforward. An adapter must implement the following interface:
+
+```ts
+export interface IAdapter<JP> {
+  /**
+   * Verifies the signature of the incoming request
+   */
+  verify: IAdapterVerify;
+
+  /**
+   * Sends the payload to the backend
+   */
+  send: IAdapterSend<JP>;
+}
+```
+
+Here, `JP` is a generic which refers to the type of the job payload. You can use the existing adapters on GitHub as a guide. Otherwise, here is a minimal reference:
+
+```ts
+const MyAdapter = <JP>(): IAdapter<JP> => {
+  return {
+    verify: async (verifyProps) => {
+      const { rawBody, req } = verifyProps;
+      return {
+        verified: true,
+        message: "LGTM 👍",
+      };
+    },
+    send: async (sendProps) => {
+      const { payload, url } = sendProps;
+      console.log(payload, url);
+    },
+  };
+};
+```
