@@ -19,6 +19,7 @@ export type IAdapterVerify = (
 
 export interface IAdapterVerifyProps {
   req: NextApiRequest;
+  rawBody: string;
 }
 
 export interface IAdapterVerifyReturnValue {
