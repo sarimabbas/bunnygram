@@ -1,2 +1,2 @@
 export { Scheduler } from "./scheduler";
-export { LocalhostAdapter, QStashAdapter } from "./adapters";
+export { BasicAdapter, QStashAdapter, IAdapter } from "./adapters";
