@@ -1,9 +1,13 @@
-import React from "react";
+import { DocsThemeConfig } from "nextra-theme-docs";
 
-export default {
-  logo: <span>My Nextra Documentation</span>,
-  project: {
-    link: "https://github.com/shuding/nextra",
+const config: DocsThemeConfig = {
+  logo: <span>Bunnygram 🐇📬</span>,
+  footer: {
+    text: <p>MIT 2023 © Bunnygram.</p>,
   },
-  // ...
+  project: {
+    link: "https://github.com/sarimabbas/bunnygram",
+  },
 };
+
+export default config;

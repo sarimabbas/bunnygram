@@ -1,0 +1,36 @@
+# Basic adapter
+
+The basic adapter is intended for testing purposes only (e.g. on `localhost`). It is the default adapter when none is specified.
+
+The basic adapter is simply a request forwarder. The `Scheduler().send()` will just make a direct `POST` request to `Scheduler().onReceive()` at the specified route.
+
+Using the [QStash adapter](/adapters/qstash) is recommended instead, so that you can control retries, delays etc.
+
+## Using the basic adapter
+
+Put your scheduler definition somewhere e.g. `tasks/send-email.ts`:
+
+```ts
+// tasks/send-email.ts
+
+import { Scheduler, BasicAdapter } from "bunnygram";
+
+interface JobPayload {
+  emailAddress: string;
+}
+
+interface JobResponse {
+  status: boolean;
+}
+
+export const sendEmail = Scheduler<JobPayload, JobResponse>({
+  // the path this API route will be accessible on
+  route: "/api/send-email",
+  config: {
+    // ... optional config
+    // if you're just testing on localhost, you also need to supply the baseUrl here:
+    baseUrl: "http://localhost:3000",
+  },
+  adapter: BasicAdapter(),
+});
+```
