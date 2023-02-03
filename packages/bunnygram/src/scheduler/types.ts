@@ -1,10 +1,6 @@
 import { NextApiHandler } from "next";
 import { z } from "zod";
-import {
-  IAdapter,
-  IAdapterSendProps,
-  IAdapterSendReturnValue,
-} from "../adapters/common";
+import { IAdapter, IAdapterSendReturnValue } from "../adapters/common";
 import { IErrorResponse } from "../utilities";
 import { ICommonConfigProps } from "./config";
 
@@ -81,7 +77,12 @@ export type IJob<JP, JR> = (payload: JP) => Promise<JR>;
 /**
  * The input to the `send()` function
  */
-export interface ISendMessageProps<JP> extends IAdapterSendProps<JP> {}
+export interface ISendMessageProps<JP> {
+  /**
+   * the payload that will eventually reach the receive handler
+   */
+  payload: JP;
+}
 
 /**
  * The output of the `send()` function
