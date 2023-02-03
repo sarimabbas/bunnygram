@@ -1,6 +1,6 @@
 # Basic adapter
 
-The basic adapter is intended for testing purposes only (e.g. on `localhost`). It is the default adapter when none is specified.
+The basic adapter is the default adapter when none is specified. It is intended for testing purposes only (e.g. on `localhost`, or when your app is not hosted on a publicly accessible URL).
 
 The basic adapter is simply a request forwarder. The `Scheduler().send()` will just make a direct `POST` request to `Scheduler().onReceive()` at the specified route.
 
@@ -24,13 +24,39 @@ interface JobResponse {
 }
 
 export const sendEmail = Scheduler<JobPayload, JobResponse>({
-  // the path this API route will be accessible on
   route: "/api/send-email",
-  config: {
-    // ... optional config
-    // if you're just testing on localhost, you also need to supply the baseUrl here:
-    baseUrl: "http://localhost:3000",
-  },
   adapter: BasicAdapter(),
+});
+```
+
+And you're done! All other steps should be the same as in [Getting started](/).
+
+### Conditionally using the basic adapter on `localhost`
+
+If your app is on `localhost` or does not have a publicly accessible URL, you may wish to conditionally use the basic adapter:
+
+```ts
+// tasks/send-email.ts
+
+import { Scheduler, BasicAdapter } from "bunnygram";
+
+interface JobPayload {
+  emailAddress: string;
+}
+
+interface JobResponse {
+  status: boolean;
+}
+
+export const sendEmail = Scheduler<JobPayload, JobResponse>({
+  route: "/api/send-email",
+  adapter:
+    process.env.NODE_ENV === "development" ? BasicAdapter() : QStashAdapter(),
+  config: {
+    baseUrl:
+      process.env.NODE_ENV === "development"
+        ? "http://localhost:3000"
+        : undefined, // 👈 leave undefined if you still want Bunnygram to guess your `baseUrl`
+  },
 });
 ```

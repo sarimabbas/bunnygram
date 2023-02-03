@@ -8,6 +8,8 @@ const config: DocsThemeConfig = {
   project: {
     link: "https://github.com/sarimabbas/bunnygram",
   },
+  docsRepositoryBase:
+    "https://github.com/sarimabbas/bunnygram/tree/main/packages/docs",
 };
 
 export default config;
