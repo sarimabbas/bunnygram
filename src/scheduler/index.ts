@@ -22,7 +22,8 @@ export const Scheduler = <JP, JR>(
   const { adapter = LocalhostAdapter() } = props;
 
   /**
-   * `onReceive` returns a NextJS API handler that should be default exported inside `api` directory
+   * `onReceive` returns a NextJS API handler that should be default exported
+   * inside `api` directory
    */
   const onReceive = <JP, JR>(
     receiveProps: IReceiveProps<JP, JR>
@@ -33,8 +34,7 @@ export const Scheduler = <JP, JR>(
     }
 
     /**
-     * Receives incoming payload from QStash (or directly from `send()` via
-     * `fetch` if on `localhost`). Then, parses the payload and uses it to run the
+     * Verifies and parses the incoming payload. Then, uses it to run the
      * user-defined job.
      * @param req - HTTP request object
      * @param res - HTTP response object
@@ -114,11 +114,7 @@ export const Scheduler = <JP, JR>(
   };
 
   /**
-   * Sends message to receive handler using QStash as the intermediary. If on
-   * `localhost`, sends message to handler via `fetch` directly. Can be used on
-   * client-side if `NEXT_PUBLIC_QSTASH_TOKEN` env var is set, or server-side if
-   * `QSTASH_TOKEN` env var is set. Can be used in both situations if
-   * `qstashToken` is set in the `Scheduler` config.
+   * Sends message to receive handler
    */
   const send = async (
     sendProps: ISendMessageProps<JP>
