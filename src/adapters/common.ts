@@ -1,7 +1,7 @@
 import { NextApiRequest } from "next";
 import { IErrorResponse } from "../utilities";
 
-// adapter
+// ----- adapter
 
 export interface IAdapter<JP> {
   // verifies the signature of the incoming request
@@ -11,7 +11,7 @@ export interface IAdapter<JP> {
   send: IAdapterSend<JP>;
 }
 
-// adapter verify
+// ----- adapter verify
 
 export type IAdapterVerify = (
   props: IAdapterVerifyProps
@@ -27,7 +27,7 @@ export interface IAdapterVerifyReturnValue {
   message?: string;
 }
 
-// adapter send
+// ----- adapter send
 
 export type IAdapterSend<JP> = (
   props: IAdapterSendProps<JP>
