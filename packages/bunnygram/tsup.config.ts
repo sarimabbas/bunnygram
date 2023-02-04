@@ -4,7 +4,7 @@ import { $ } from "zx";
 export default defineConfig({
   entry: ["src/index.ts"],
   clean: true,
-  format: ["esm", "cjs"],
+  format: ["esm"],
   dts: false,
   onSuccess: async () => {
     $`tsc`;
