@@ -44,7 +44,7 @@ export const QStashAdapter = <JP>(props: IQStashAdapterProps): IAdapter<JP> => {
       };
     },
     verify: async (verifyProps) => {
-      const { req } = verifyProps;
+      const { req, rawBody } = verifyProps;
       // todo(sarim): do we need to guard this with isBrowser()?
 
       const verifyConfig = getQStashVerifyConfig();
@@ -70,15 +70,9 @@ export const QStashAdapter = <JP>(props: IQStashAdapterProps): IAdapter<JP> => {
         };
       }
 
-      const chunks = [];
-      for await (const chunk of req) {
-        chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
-      }
-      const body = Buffer.concat(chunks).toString("utf-8");
-
       const isValid = await receiver.verify({
         signature,
-        body,
+        body: rawBody,
       });
 
       if (!isValid) {
