@@ -1,12 +1,9 @@
-import {
-  NextApiHandler,
-  NextApiRequest,
-  PageConfig,
-  ServerRuntime,
-} from "next";
+import { NextApiRequest, PageConfig } from "next";
 import { z } from "zod";
 import { IAdapter, IAdapterSendReturnValue } from "../adapters/common";
 import { IErrorResponse } from "../utilities";
+import { IHandler } from "../utilities/handler";
+import { IServerRuntime } from "../utilities/runtime";
 import { ICommonConfigProps } from "./config";
 
 // generics key
@@ -38,9 +35,9 @@ export interface ISchedulerProps<JP> {
   adapter?: IAdapter<JP>;
 
   /**
-   * Which runtime to use
+   * Which runtime to use. Leave empty for Bunnygram to guess
    */
-  runtime?: Extract<ServerRuntime, "edge" | "nodejs">;
+  runtime?: IServerRuntime;
 }
 
 /**
@@ -52,7 +49,7 @@ export interface ISchedulerReturnValue<JP, JR> {
    */
   onReceive: (
     props: IReceiveProps<JP, JR>
-  ) => NextApiHandler<IReceiveMessageReturnValue<JR>>;
+  ) => IHandler<IReceiveMessageReturnValue<JR>>;
 
   /**
    * send a message to the scheduler. can be called in both client and
