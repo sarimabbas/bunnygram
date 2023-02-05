@@ -2,9 +2,9 @@ import type { NextApiHandler, PageConfig, ServerRuntime } from "next";
 import { NextResponse } from "next/server";
 import { BasicAdapter } from "../adapters/basic";
 import { IEdgeApiHandler, IHandler } from "../utilities/handler";
-import { getRequestBody } from "../utilities/requests";
 import { guessRuntime, IRuntime } from "../utilities/runtime/common";
 import { getFetchRequestBody } from "../utilities/runtime/edge";
+import { getNodeRequestBody } from "../utilities/runtime/node";
 import { getCommonConfig } from "./config";
 import { statusMessages } from "./messages";
 import {
@@ -126,7 +126,7 @@ export const Scheduler = <JP, JR>(
 
       // ----- get the parsed and raw body from the request
 
-      const { parsedBody, rawBody } = await getRequestBody(req);
+      const { parsedBody, rawBody } = await getNodeRequestBody(req);
 
       req.body = parsedBody;
 

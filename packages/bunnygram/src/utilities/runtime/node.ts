@@ -1,8 +1,8 @@
 import { NextApiRequest } from "next";
-import { IncomingHttpHeaders } from "node:http";
+import type { IncomingHttpHeaders } from "node:http";
 import type { Readable } from "node:stream";
 
-export const getRequestBody = async (req: NextApiRequest) => {
+export const getNodeRequestBody = async (req: NextApiRequest) => {
   const buf = await buffer(req);
   const rawBody = buf.toString("utf8");
   const parsedBody = parseRawBody(rawBody, req.headers);
