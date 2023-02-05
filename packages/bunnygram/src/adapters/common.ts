@@ -1,6 +1,6 @@
 import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
-import { IErrorResponse } from "../utilities";
+import { IErrorResponse } from "../utilities/types";
 import { IRuntime } from "../utilities/runtime/common";
 
 // ----- adapter
