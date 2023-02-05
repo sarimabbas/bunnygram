@@ -1,8 +1,12 @@
-import type { NextApiHandler, PageConfig } from "next";
+import type { NextApiHandler, PageConfig, ServerRuntime } from "next";
+import { NextResponse } from "next/server";
 import { BasicAdapter } from "../adapters/basic";
-import { isBrowser } from "../utilities";
+import { IEdgeApiHandler, IHandler } from "../utilities/handler";
 import { getRequestBody } from "../utilities/requests";
+import { guessRuntime, IRuntime } from "../utilities/runtime/common";
+import { getFetchRequestBody } from "../utilities/runtime/edge";
 import { getCommonConfig } from "./config";
+import { statusMessages } from "./messages";
 import {
   IReceiveMessageReturnValue,
   IReceiveProps,
@@ -21,36 +25,103 @@ export const Scheduler = <JP, JR>(
 ): ISchedulerReturnValue<JP, JR> => {
   const { adapter = BasicAdapter() } = props;
 
+  // get runtime
+  const runtime = guessRuntime(props.runtime as IRuntime | undefined);
+
   /**
    * `onReceive` returns a NextJS API handler that should be default exported
    * inside `api` directory
    */
   const onReceive = <JP, JR>(
     receiveProps: IReceiveProps<JP, JR>
-  ): NextApiHandler<IReceiveMessageReturnValue<JR>> => {
+  ): IHandler<IReceiveMessageReturnValue<JR>> => {
     // evaluating this code in the browser is a no-op
-    if (isBrowser()) {
+    if (runtime === "browser") {
       return () => {};
     }
 
-    /**
-     * Verifies and parses the incoming payload. Then, uses it to run the
-     * user-defined job.
-     * @param req - HTTP request object
-     * @param res - HTTP response object
-     * @returns a NextJS API handler
-     */
-    const handler: NextApiHandler<IReceiveMessageReturnValue<JR>> = async (
+    if (runtime === "edge") {
+      const edgeHandler: IEdgeApiHandler = async (req) => {
+        // ----- check request method
+
+        if (req.method !== "POST") {
+          return NextResponse.json(statusMessages["err-post-only"].msg, {
+            status: statusMessages["err-post-only"].httpStatusCode,
+          });
+        }
+
+        // ----- get the parsed and raw body from the request, while leaving the
+        // original unchanged
+        const { parsedBody, rawBody } = await getFetchRequestBody<JP>(req);
+
+        // ----- verify the request
+
+        const verification = await adapter.verify({
+          req,
+          rawBody,
+          runtime,
+        });
+
+        if (!verification.verified) {
+          return NextResponse.json(statusMessages["err-adapter-verify"].msg, {
+            status: statusMessages["err-adapter-verify"].httpStatusCode,
+          });
+        }
+
+        // ----- validate the payload
+
+        let payload: JP = parsedBody!;
+
+        if (props?.validator) {
+          const p = props.validator.safeParse(payload);
+          if (!p.success) {
+            console.error(p.error);
+            return NextResponse.json(
+              statusMessages["err-validate-payload"].msg,
+              {
+                status: statusMessages["err-validate-payload"].httpStatusCode,
+              }
+            );
+          }
+        }
+
+        // ----- run the job
+
+        try {
+          const jobResponse = await receiveProps.job({
+            payload,
+            req,
+          });
+          return NextResponse.json(
+            {
+              jobResponse,
+              ...statusMessages["success-job-run"].msg,
+            },
+            {
+              status: statusMessages["success-job-run"].httpStatusCode,
+            }
+          );
+        } catch (err) {
+          console.error(err);
+          return NextResponse.json(statusMessages["err-job-run"].msg, {
+            status: statusMessages["err-job-run"].httpStatusCode,
+          });
+        }
+      };
+
+      return edgeHandler;
+    }
+
+    const nodeHandler: NextApiHandler<IReceiveMessageReturnValue<JR>> = async (
       req,
       res
     ) => {
       // ----- check request method
 
       if (req.method !== "POST") {
-        return res.status(405).json({
-          message: "Only POST requests allowed",
-          error: true,
-        });
+        return res
+          .status(statusMessages["err-post-only"].httpStatusCode)
+          .json(statusMessages["err-post-only"].msg);
       }
 
       // ----- get the parsed and raw body from the request
@@ -64,13 +135,13 @@ export const Scheduler = <JP, JR>(
       const verification = await adapter.verify({
         req,
         rawBody,
+        runtime,
       });
+
       if (!verification.verified) {
-        return res.status(500).json({
-          message:
-            verification.message ?? "Bunnygram: could not verify request",
-          error: true,
-        });
+        return res
+          .status(statusMessages["err-post-only"].httpStatusCode)
+          .json(statusMessages["err-post-only"].msg);
       }
 
       // ----- validate the payload
@@ -82,13 +153,15 @@ export const Scheduler = <JP, JR>(
           props.validator.parse(payload);
         } catch (err) {
           console.error(err);
-          return res.status(500).json({
-            message:
-              err instanceof Error
-                ? err.message
-                : "Failed to validate request payload",
-            error: true,
-          });
+          return res
+            .status(statusMessages["err-post-only"].httpStatusCode)
+            .json({
+              message:
+                err instanceof Error
+                  ? err.message
+                  : statusMessages["err-post-only"].msg.message,
+              error: true,
+            });
         }
       }
 
@@ -99,21 +172,22 @@ export const Scheduler = <JP, JR>(
           payload,
           req,
         });
-        return res.status(200).json({
-          jobResponse,
-          message: "Job finished executing",
-          error: false,
-        });
+        return res
+          .status(statusMessages["success-job-run"].httpStatusCode)
+          .json({ jobResponse, ...statusMessages["success-job-run"].msg });
       } catch (err) {
         console.error(err);
-        return res.status(500).json({
-          message: err instanceof Error ? err.message : "Job failed to execute",
+        return res.status(statusMessages["err-job-run"].httpStatusCode).json({
+          message:
+            err instanceof Error
+              ? err.message
+              : statusMessages["err-job-run"].msg.message,
           error: true,
         });
       }
     };
 
-    return handler;
+    return nodeHandler;
   };
 
   /**
@@ -130,6 +204,7 @@ export const Scheduler = <JP, JR>(
     const response = await adapter.send({
       payload,
       url,
+      runtime,
     });
 
     return response;
@@ -139,6 +214,7 @@ export const Scheduler = <JP, JR>(
    * Exports a config for Next.js to detect
    */
   const onReceiveConfig: PageConfig = {
+    runtime: runtime as ServerRuntime,
     api: {
       bodyParser: false,
     },

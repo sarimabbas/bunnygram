@@ -1,9 +1,10 @@
 import { NextApiRequest, PageConfig } from "next";
+import { NextRequest } from "next/server";
 import { z } from "zod";
 import { IAdapter, IAdapterSendReturnValue } from "../adapters/common";
 import { IErrorResponse } from "../utilities";
 import { IHandler } from "../utilities/handler";
-import { IServerRuntime } from "../utilities/runtime";
+import { IServerRuntime } from "../utilities/runtime/common";
 import { ICommonConfigProps } from "./config";
 
 // generics key
@@ -95,7 +96,7 @@ interface IJobProps<JP> {
   /**
    * The full HTTP request
    */
-  req: NextApiRequest;
+  req: NextApiRequest | NextRequest;
 }
 
 /**
