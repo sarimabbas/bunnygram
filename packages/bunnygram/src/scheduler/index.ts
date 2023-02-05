@@ -1,12 +1,12 @@
 import type { NextApiHandler, PageConfig, ServerRuntime } from "next";
 import { NextResponse } from "next/server";
 import { BasicAdapter } from "../adapters/basic";
-import { IEdgeApiHandler, IHandler } from "../utilities/handler";
+import type { IEdgeApiHandler, IHandler } from "../utilities/handler";
 import { getFetchRequestBody } from "../utilities/http/edge";
 import { getNodeRequestBody } from "../utilities/http/node";
 import { getCommonConfig } from "./config";
 import { statusMessages } from "./messages";
-import {
+import type {
   IReceiveMessageReturnValue,
   IReceiveProps,
   ISchedulerProps,

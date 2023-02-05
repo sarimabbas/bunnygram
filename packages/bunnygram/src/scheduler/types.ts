@@ -1,10 +1,10 @@
-import { NextApiRequest, PageConfig } from "next";
-import { NextRequest } from "next/server";
+import type { NextApiRequest, PageConfig } from "next";
+import type { NextRequest } from "next/server";
 import { z } from "zod";
-import { IAdapter, IAdapterSendReturnValue } from "../adapters/types";
-import { IErrorResponse } from "../utilities/types";
-import { IHandler } from "../utilities/handler";
-import { ICommonConfigProps } from "./config";
+import type { IAdapter, IAdapterSendReturnValue } from "../adapters/types";
+import type { IHandler } from "../utilities/handler";
+import type { IErrorResponse } from "../utilities/types";
+import type { ICommonConfigProps } from "./config";
 
 // generics key
 // JP: JobPayload

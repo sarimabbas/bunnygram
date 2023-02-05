@@ -1,11 +1,11 @@
-import { Client, PublishJsonRequest, Receiver } from "@upstash/qstash";
-import { NextApiRequest } from "next";
-import { NextRequest } from "next/server";
-import { IAdapter } from "../types";
+import { Client, Receiver, type PublishJsonRequest } from "@upstash/qstash";
+import type { NextApiRequest } from "next";
+import type { NextRequest } from "next/server";
+import type { IAdapter } from "../types";
 import {
   getQStashSendConfig,
   getQStashVerifyConfig,
-  IQStashConfig,
+  type IQStashConfig,
 } from "./config";
 
 export interface IQStashAdapterProps {
