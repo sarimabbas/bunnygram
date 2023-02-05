@@ -1,4 +1,4 @@
-import { IAdapter } from "../common";
+import { IAdapter } from "../types";
 
 export interface IBasicAdapterProps {}
 

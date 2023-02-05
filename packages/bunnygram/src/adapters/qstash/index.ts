@@ -1,7 +1,7 @@
 import { Client, PublishJsonRequest, Receiver } from "@upstash/qstash";
 import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
-import { IAdapter } from "../common";
+import { IAdapter } from "../types";
 import {
   getQStashSendConfig,
   getQStashVerifyConfig,

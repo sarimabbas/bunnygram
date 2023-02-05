@@ -1,7 +1,7 @@
 import { NextApiRequest, PageConfig } from "next";
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { IAdapter, IAdapterSendReturnValue } from "../adapters/common";
+import { IAdapter, IAdapterSendReturnValue } from "../adapters/types";
 import { IErrorResponse } from "../utilities/types";
 import { IHandler } from "../utilities/handler";
 import { ICommonConfigProps } from "./config";
