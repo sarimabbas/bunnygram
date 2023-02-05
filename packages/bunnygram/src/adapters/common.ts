@@ -1,5 +1,7 @@
 import { NextApiRequest } from "next";
+import { NextRequest } from "next/server";
 import { IErrorResponse } from "../utilities";
+import { IRuntime } from "../utilities/runtime/common";
 
 // ----- adapter
 
@@ -22,8 +24,9 @@ export type IAdapterVerify = (
 ) => Promise<IAdapterVerifyReturnValue>;
 
 export interface IAdapterVerifyProps {
-  req: NextApiRequest;
+  req: NextApiRequest | NextRequest;
   rawBody: string;
+  runtime: IRuntime;
 }
 
 export interface IAdapterVerifyReturnValue {
@@ -47,6 +50,11 @@ export interface IAdapterSendProps<JP> {
    * the payload that will eventually reach the receive handler
    */
   payload: JP;
+
+  /**
+   * What runtime the send() is running under
+   */
+  runtime: IRuntime;
 }
 
 export interface IAdapterSendReturnValue extends IErrorResponse {

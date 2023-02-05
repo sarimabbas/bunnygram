@@ -1,4 +1,6 @@
 import { Client, PublishJsonRequest, Receiver } from "@upstash/qstash";
+import { NextApiRequest } from "next";
+import { NextRequest } from "next/server";
 import { IAdapter } from "../common";
 import {
   getQStashSendConfig,
@@ -44,8 +46,12 @@ export const QStashAdapter = <JP>(props: IQStashAdapterProps): IAdapter<JP> => {
       };
     },
     verify: async (verifyProps) => {
-      const { req, rawBody } = verifyProps;
-      // todo(sarim): do we need to guard this with isBrowser()?
+      const { req, rawBody, runtime } = verifyProps;
+      if (runtime === "browser") {
+        return {
+          verified: true,
+        };
+      }
 
       const verifyConfig = getQStashVerifyConfig();
 
@@ -54,7 +60,12 @@ export const QStashAdapter = <JP>(props: IQStashAdapterProps): IAdapter<JP> => {
         nextSigningKey: verifyConfig.qstashNextSigningKey,
       });
 
-      const signature = req.headers["upstash-signature"];
+      let signature: any = "";
+      if (runtime === "edge") {
+        signature = (req as NextRequest).headers.get("upstash-signature");
+      } else {
+        signature = (req as NextApiRequest).headers["upstash-signature"];
+      }
 
       if (!signature) {
         return {
