@@ -1,4 +1,4 @@
-import type { NextApiHandler } from "next";
+import type { NextApiHandler, PageConfig } from "next";
 import { BasicAdapter } from "../adapters/basic";
 import { isBrowser } from "../utilities";
 import { getRequestBody } from "../utilities/requests";
@@ -135,8 +135,18 @@ export const Scheduler = <JP, JR>(
     return response;
   };
 
+  /**
+   * Exports a config for Next.js to detect
+   */
+  const onReceiveConfig: PageConfig = {
+    api: {
+      bodyParser: false,
+    },
+  };
+
   return {
     onReceive,
     send,
+    onReceiveConfig,
   };
 };

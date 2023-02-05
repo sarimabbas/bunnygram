@@ -1,4 +1,9 @@
-import { NextApiHandler, NextApiRequest } from "next";
+import {
+  NextApiHandler,
+  NextApiRequest,
+  PageConfig,
+  ServerRuntime,
+} from "next";
 import { z } from "zod";
 import { IAdapter, IAdapterSendReturnValue } from "../adapters/common";
 import { IErrorResponse } from "../utilities";
@@ -31,6 +36,11 @@ export interface ISchedulerProps<JP> {
    * Which adapter to use
    */
   adapter?: IAdapter<JP>;
+
+  /**
+   * Which runtime to use
+   */
+  runtime?: Extract<ServerRuntime, "edge" | "nodejs">;
 }
 
 /**
@@ -49,6 +59,11 @@ export interface ISchedulerReturnValue<JP, JR> {
    * serverside contexts
    */
   send: (props: ISendMessageProps<JP>) => Promise<ISendMessageReturnValue>;
+
+  /**
+   * required config for the scheduler handler to work
+   */
+  onReceiveConfig: PageConfig;
 }
 
 /**
