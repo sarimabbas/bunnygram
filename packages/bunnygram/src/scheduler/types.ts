@@ -1,4 +1,4 @@
-import type { NextApiRequest, PageConfig } from "next";
+import type { NextApiRequest } from "next";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 import type { IAdapter, IAdapterSendReturnValue } from "../adapters/types";
@@ -51,11 +51,6 @@ export interface ISchedulerReturnValue<JP, JR> {
    * serverside contexts
    */
   send: (props: ISendMessageProps<JP>) => Promise<ISendMessageReturnValue>;
-
-  /**
-   * required config for the scheduler handler to work
-   */
-  onReceiveConfig: PageConfig;
 }
 
 /**

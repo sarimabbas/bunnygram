@@ -1,5 +1,4 @@
-import type { NextApiHandler, PageConfig, ServerRuntime } from "next";
-import { NextResponse } from "next/server";
+import type { NextApiHandler } from "next";
 import { BasicAdapter } from "../adapters/basic";
 import type { IEdgeApiHandler, IHandler } from "../utilities/handler";
 import { getFetchRequestBody } from "../utilities/http/edge";
@@ -34,12 +33,14 @@ export const Scheduler = <JP, JR>(
     receiveProps: IReceiveProps<JP, JR>
   ): IHandler<IReceiveMessageReturnValue<JR>> => {
     // evaluating this code in the browser is a no-op
-    if (runtime === "browser") {
+    if (typeof window !== "undefined") {
       return () => {};
     }
 
     if (runtime === "edge") {
       const edgeHandler: IEdgeApiHandler = async (req) => {
+        const NextResponse = (await import("next/server")).NextResponse;
+
         // ----- check request method
 
         if (req.method !== "POST") {
@@ -207,19 +208,8 @@ export const Scheduler = <JP, JR>(
     return response;
   };
 
-  /**
-   * Exports a config for Next.js to detect
-   */
-  const onReceiveConfig: PageConfig = {
-    runtime: runtime as ServerRuntime,
-    api: {
-      bodyParser: false,
-    },
-  };
-
   return {
     onReceive,
-    onReceiveConfig,
     send,
   };
 };
