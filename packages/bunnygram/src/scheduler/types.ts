@@ -4,7 +4,6 @@ import { z } from "zod";
 import { IAdapter, IAdapterSendReturnValue } from "../adapters/common";
 import { IErrorResponse } from "../utilities/types";
 import { IHandler } from "../utilities/handler";
-import { IServerRuntime } from "../utilities/runtime/common";
 import { ICommonConfigProps } from "./config";
 
 // generics key
@@ -34,11 +33,6 @@ export interface ISchedulerProps<JP> {
    * Which adapter to use
    */
   adapter?: IAdapter<JP>;
-
-  /**
-   * Which runtime to use. Leave empty for Bunnygram to guess
-   */
-  runtime?: IServerRuntime;
 }
 
 /**

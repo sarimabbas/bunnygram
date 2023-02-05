@@ -2,9 +2,8 @@ import type { NextApiHandler, PageConfig, ServerRuntime } from "next";
 import { NextResponse } from "next/server";
 import { BasicAdapter } from "../adapters/basic";
 import { IEdgeApiHandler, IHandler } from "../utilities/handler";
-import { guessRuntime, IRuntime } from "../utilities/runtime/common";
-import { getFetchRequestBody } from "../utilities/runtime/edge";
-import { getNodeRequestBody } from "../utilities/runtime/node";
+import { getFetchRequestBody } from "../utilities/http/edge";
+import { getNodeRequestBody } from "../utilities/http/node";
 import { getCommonConfig } from "./config";
 import { statusMessages } from "./messages";
 import {
@@ -25,8 +24,8 @@ export const Scheduler = <JP, JR>(
 ): ISchedulerReturnValue<JP, JR> => {
   const { adapter = BasicAdapter() } = props;
 
-  // get runtime
-  const runtime = guessRuntime(props.runtime as IRuntime | undefined);
+  const commonConfig = getCommonConfig(props.config);
+  const { runtime, baseUrl } = commonConfig;
 
   /**
    * `onReceive` returns a NextJS API handler that should be default exported
@@ -198,8 +197,7 @@ export const Scheduler = <JP, JR>(
   ): Promise<ISendMessageReturnValue> => {
     const { payload } = sendProps;
 
-    const config = getCommonConfig(props.config);
-    const url = new URL(props.route, config.baseUrl).href;
+    const url = new URL(props.route, baseUrl).href;
 
     const response = await adapter.send({
       payload,

@@ -1,7 +1,7 @@
 import { NextApiRequest } from "next";
 import { NextRequest } from "next/server";
+import { IRuntime } from "../scheduler/config";
 import { IErrorResponse } from "../utilities/types";
-import { IRuntime } from "../utilities/runtime/common";
 
 // ----- adapter
 
