@@ -219,7 +219,7 @@ export const Scheduler = <JP, JR>(
 
   return {
     onReceive,
-    send,
     onReceiveConfig,
+    send,
   };
 };
