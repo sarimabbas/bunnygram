@@ -22,9 +22,8 @@ import {
 export const Scheduler = <JP, JR>(
   props: ISchedulerProps<JP>
 ): ISchedulerReturnValue<JP, JR> => {
-  const { adapter = BasicAdapter() } = props;
-
-  const commonConfig = getCommonConfig(props.config);
+  const { adapter = BasicAdapter(), config } = props;
+  const commonConfig = getCommonConfig(config);
   const { runtime, baseUrl } = commonConfig;
 
   /**
