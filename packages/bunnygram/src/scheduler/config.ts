@@ -23,7 +23,8 @@ export type ICommonConfigProps = Partial<z.infer<typeof ZCommonConfig>>;
 export const getCommonConfig = (props?: ICommonConfigProps) => {
   const config = ZCommonConfig.parse({
     baseUrl: getBaseUrl(props),
-  });
+    runtime: getRuntime(props),
+  } as ICommonConfigProps);
   return config;
 };
 
