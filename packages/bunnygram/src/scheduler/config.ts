@@ -1,38 +1,23 @@
+import type { ServerRuntime } from "next";
 import { z } from "zod";
+import { IAdapter } from "../adapters";
 
-const ZRuntime = z.enum(["browser", "nodejs", "edge"]);
+export type IRuntime = Extract<ServerRuntime, "nodejs" | "edge"> | "browser";
 
-const ZCommonConfig = z.object({
-  baseUrl: z
-    .string({
-      invalid_type_error:
-        "We couldn't figure out a baseUrl for your app. Maybe try passing it via config e.g. https://example.com",
-      required_error:
-        "We couldn't figure out a baseUrl for your app. Maybe try passing it via config e.g. https://example.com",
-      description:
-        "Where the scheduler can be reached. We try to infer, so this is optional",
-    })
-    .url(),
-  runtime: ZRuntime,
-});
+export interface IConfig<JP, JR> {
+  route: string;
+  adapter?: IAdapter<JP>;
+  baseUrl?: string;
+  validator?: z.ZodSchema<JP>;
+}
 
-export type IRuntime = z.infer<typeof ZRuntime>;
-
-export type ICommonConfigProps = Partial<z.infer<typeof ZCommonConfig>>;
-
-export const getCommonConfig = (props?: ICommonConfigProps) => {
-  const config = ZCommonConfig.parse({
-    baseUrl: getBaseUrl(props),
-    runtime: getRuntime(props),
-  } as ICommonConfigProps);
+export const makeConfig = <JP, JR>(
+  config: IConfig<JP, JR>
+): IConfig<JP, JR> => {
   return config;
 };
 
-export const getBaseUrl = (props?: ICommonConfigProps) => {
-  if (props?.baseUrl) {
-    return props.baseUrl;
-  }
-
+export const getBaseUrl = () => {
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
@@ -42,12 +27,7 @@ export const getBaseUrl = (props?: ICommonConfigProps) => {
   }
 };
 
-export const getRuntime = (props?: ICommonConfigProps) => {
-  // user argument takes priority, they know what they are doing
-  if (typeof props?.runtime !== "undefined") {
-    return props?.runtime;
-  }
-
+export const getRuntime = (): IRuntime => {
   // neither node nor edge support window
   if (typeof window !== "undefined") {
     return "browser";

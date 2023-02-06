@@ -1,4 +1,4 @@
-import { IReceiveMessageReturnValue } from "./types";
+import type { IReceiveReturnValue } from "./types";
 
 export const statusMessages = {
   "err-post-only": {
@@ -39,7 +39,7 @@ export const statusMessages = {
 } satisfies Record<
   string,
   {
-    msg: IReceiveMessageReturnValue<any>;
+    msg: IReceiveReturnValue<any>;
     httpStatusCode: number;
   }
 >;

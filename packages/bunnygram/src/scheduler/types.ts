@@ -1,104 +1,32 @@
-import type { NextApiRequest } from "next";
-import type { NextRequest } from "next/server";
-import { z } from "zod";
-import type { IAdapter, IAdapterSendReturnValue } from "../adapters/types";
-import type { IHandler } from "../utilities/handler";
-import type { IErrorResponse } from "../utilities/types";
-import type { ICommonConfigProps } from "./config";
+import type { NextApiRequest, NextApiResponse } from "next";
+import type { NextRequest, NextResponse } from "next/server";
+import { IConfig } from "./config";
 
-// generics key
-// JP: JobPayload
-// JR: JobResponse
-
-/**
- * The input to the `Scheduler()` function
- */
-export interface ISchedulerProps<JP> {
-  /**
-   * the route it is reachable on
-   */
-  route: string;
-
-  /**
-   * an optional zod validator for the incoming payload
-   */
-  validator?: z.ZodSchema<JP>;
-
-  /**
-   * extra config
-   */
-  config?: ICommonConfigProps;
-
-  /**
-   * Which adapter to use
-   */
-  adapter?: IAdapter<JP>;
-}
-
-/**
- * The output of the `Scheduler()` function
- */
-export interface ISchedulerReturnValue<JP, JR> {
-  /**
-   * NextJS API handler that should be default exported inside `api` directory
-   */
-  onReceive: (
-    props: IReceiveProps<JP, JR>
-  ) => IHandler<IReceiveMessageReturnValue<JR>>;
-
-  /**
-   * send a message to the scheduler. can be called in both client and
-   * serverside contexts
-   */
-  send: (props: ISendMessageProps<JP>) => Promise<ISendMessageReturnValue>;
-}
-
-/**
- * The input of the `onReceive` function
- */
 export interface IReceiveProps<JP, JR> {
-  job: IJob<JP, JR>;
+  config: IConfig<JP, JR>;
+  job: (props: IJobProps<JP>) => Promise<JR>;
 }
 
-/**
- * The response structure of the API handler. This will be seen by QStash
- */
-export interface IReceiveMessageReturnValue<JR> extends IErrorResponse {
-  /**
-   * The output of the job
-   */
+export interface IReceiveReturnValue<JR> {
   jobResponse?: JR;
+  error: boolean;
+  message: string;
 }
 
-/**
- * IJob describes a job to be run
- * It takes in a payload of type JP and returns a JR
- */
-export type IJob<JP, JR> = (props: IJobProps<JP>) => Promise<JR>;
+// job
 
-interface IJobProps<JP> {
-  /**
-   * The received payload
-   */
+export interface IJobProps<JP> {
   payload: JP;
-
-  /**
-   * The full HTTP request
-   */
-  req: NextApiRequest | NextRequest;
+  req: NextRequest | NextApiRequest;
 }
 
-/**
- * The input to the `send()` function
- */
-export interface ISendMessageProps<JP> {
-  /**
-   * the payload that will eventually reach the receive handler
-   */
-  payload: JP;
-}
+// handler
 
-/**
- * The output of the `send()` function
- */
-export interface ISendMessageReturnValue extends IAdapterSendReturnValue {}
+export type IHandler<JR> =
+  // edge
+  | ((req: NextRequest) => Promise<NextResponse>)
+  // node
+  | ((
+      req: NextApiRequest,
+      res: NextApiResponse<IReceiveReturnValue<JR>>
+    ) => Promise<unknown> | unknown);
