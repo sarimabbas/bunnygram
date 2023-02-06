@@ -3,7 +3,7 @@ import { BasicAdapter } from "../../../adapters";
 import { getFetchRequestBody } from "../../../utilities/http/edge";
 import { getRuntime } from "../../config";
 import { statusMessages } from "../../messages";
-import type { IHandler, IReceiveProps } from "../../types";
+import type { IHandler, IReceiveProps } from "../types";
 
 export const onReceiveEdge = <JP, JR>(
   props: IReceiveProps<JP, JR>

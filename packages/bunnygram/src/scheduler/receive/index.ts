@@ -1,7 +1,7 @@
 import { getRuntime } from "../../scheduler/config";
 import { onReceiveEdge } from "../receive/runtimes/edge";
 import { onReceiveNode } from "../receive/runtimes/node";
-import { IHandler, IReceiveProps } from "../types";
+import { IHandler, IReceiveProps } from "./types";
 
 export const onReceive = <JP, JR>(
   props: IReceiveProps<JP, JR>

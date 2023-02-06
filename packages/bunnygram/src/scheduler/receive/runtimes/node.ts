@@ -3,7 +3,7 @@ import { BasicAdapter } from "../../../adapters";
 import { getNodeRequestBody } from "../../../utilities/http/node";
 import { getRuntime } from "../../config";
 import { statusMessages } from "../../messages";
-import type { IHandler, IReceiveProps, IReceiveReturnValue } from "../../types";
+import type { IHandler, IReceiveProps, IReceiveReturnValue } from "../types";
 
 export const onReceiveNode = <JP, JR>(
   props: IReceiveProps<JP, JR>

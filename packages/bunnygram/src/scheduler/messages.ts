@@ -1,4 +1,4 @@
-import type { IReceiveReturnValue } from "./types";
+import { IReceiveReturnValue } from "./receive/types";
 
 export const statusMessages = {
   "err-post-only": {
