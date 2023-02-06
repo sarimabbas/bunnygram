@@ -1,6 +1,6 @@
 import { run } from "node:test";
 import { test, expect, vi } from "vitest";
-import { getBaseUrl, getRuntime } from "./config";
+import { getBaseUrl, getRuntime } from ".";
 
 test("getBaseUrl with env", () => {
   vi.stubEnv("VERCEL_URL", "example.vercel.app");
