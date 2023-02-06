@@ -1,11 +1,10 @@
 import { sendEmail } from "@/tasks/send-email";
-import { writeFile } from "fs/promises";
+import { onReceive } from "bunnygram";
 
-export default sendEmail.onReceive({
-  job: async (props) => {
-    const { payload } = props;
-    const { name } = payload;
-    writeFile("./tmp.txt", `${name}`);
+onReceive({
+  config: sendEmail,
+  job: async ({ payload }) => {
+    console.log("hello ", payload.name);
     return {
       status: true,
     };

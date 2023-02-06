@@ -1,8 +1,10 @@
 import { sendEmail } from "@/tasks/send-email";
+import { send } from "bunnygram";
 
 export default function Home() {
   const runJob = async () => {
-    const resp = await sendEmail.send({
+    const resp = await send({
+      config: sendEmail,
       payload: {
         name: "sarim",
       },
