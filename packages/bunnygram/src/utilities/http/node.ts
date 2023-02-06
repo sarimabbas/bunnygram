@@ -1,4 +1,4 @@
-import { NextApiRequest } from "next";
+import type { NextApiRequest } from "next";
 import type { IncomingHttpHeaders } from "node:http";
 import type { Readable } from "node:stream";
 
