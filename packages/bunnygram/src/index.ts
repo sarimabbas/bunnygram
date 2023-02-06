@@ -1,4 +1,2 @@
-export { makeConfig, IConfig } from "./scheduler/config";
-export { onReceive } from "./scheduler/receive";
-export { send } from "./scheduler/send";
+export * from "./scheduler";
 export { BasicAdapter, QStashAdapter, IAdapter } from "./adapters";
