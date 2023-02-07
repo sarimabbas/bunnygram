@@ -19,17 +19,19 @@ interface IAdapter<JP> {
 Here, `JP` is a generic which refers to the type of the job payload. You can use the existing adapters on GitHub as a guide. Otherwise, here is a minimal reference:
 
 ```ts
+import type { IAdapter } from "bunnygram";
+
 const MyAdapter = <JP>(): IAdapter<JP> => {
   return {
     verify: async (verifyProps) => {
-      const { rawBody, req } = verifyProps;
+      const { rawBody, req, runtime } = verifyProps;
       return {
         verified: true,
         message: "LGTM 👍",
       };
     },
     send: async (sendProps) => {
-      const { payload, url } = sendProps;
+      const { payload, url, runtime } = sendProps;
       console.log(payload, url);
     },
   };
