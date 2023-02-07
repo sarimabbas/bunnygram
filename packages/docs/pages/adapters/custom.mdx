@@ -42,5 +42,5 @@ Your adapter should be resilient to running in different JavaScript runtimes e.g
 
 Here are some tips you can use:
 
-1. We pass the current `runtime` as part of the `sendProps` on the ` send` function and `verifyProps` on the `verify` function. You can use that for conditional logic.
+1. Bunnygram exposes the current `runtime` as part of the `sendProps` on the ` send` function and `verifyProps` on the `verify` function. You can use that for conditional logic.
 2. Even if you have conditional guards, you can still run into import errors if, for example, you have a Node.js-specific dependency and the import statement is read by the browser (or any other incompatible import combination between the runtimes). To prevent this, you can use runtime dynamic imports: <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import>. As reference, check the source code of the QStash adapter.
