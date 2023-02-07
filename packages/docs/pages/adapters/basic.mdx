@@ -2,7 +2,7 @@
 
 The basic adapter is the **default** adapter when none is specified. It is intended for testing purposes only (e.g. on `localhost`, or when your app is not hosted on a publicly accessible URL).
 
-The basic adapter is simply a request forwarder. The `Scheduler().send()` will just make a direct `POST` request to `Scheduler().onReceive()` at the specified route.
+The basic adapter is simply a request forwarder. The `send()` will just make a direct `POST` request to `onReceive()` at the specified route.
 
 Using the [QStash adapter](/adapters/qstash) is recommended instead, so that you can control retries, delays etc.
 
@@ -13,7 +13,7 @@ Put your scheduler definition somewhere e.g. `tasks/send-email.ts`:
 ```ts
 // tasks/send-email.ts
 
-import { Scheduler, BasicAdapter } from "bunnygram";
+import { makeConfig, BasicAdapter } from "bunnygram";
 
 interface JobPayload {
   emailAddress: string;
@@ -23,7 +23,7 @@ interface JobResponse {
   status: boolean;
 }
 
-export const sendEmail = Scheduler<JobPayload, JobResponse>({
+export const sendEmail = makeConfig<JobPayload, JobResponse>({
   route: "/api/send-email",
   adapter: BasicAdapter(),
 });
@@ -38,7 +38,7 @@ If your app is on `localhost` or does not have a publicly accessible URL, you ma
 ```ts
 // tasks/send-email.ts
 
-import { Scheduler, BasicAdapter, QStashAdapter } from "bunnygram";
+import { makeConfig, BasicAdapter, QStashAdapter } from "bunnygram";
 
 interface JobPayload {
   emailAddress: string;
@@ -48,15 +48,13 @@ interface JobResponse {
   status: boolean;
 }
 
-export const sendEmail = Scheduler<JobPayload, JobResponse>({
+export const sendEmail = makeConfig<JobPayload, JobResponse>({
   route: "/api/send-email",
+  baseUrl:
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:3000"
+      : undefined, // 👈 leave undefined if you still want Bunnygram to guess your `baseUrl` in production
   adapter:
     process.env.NODE_ENV === "development" ? BasicAdapter() : QStashAdapter(),
-  config: {
-    baseUrl:
-      process.env.NODE_ENV === "development"
-        ? "http://localhost:3000"
-        : undefined, // 👈 leave undefined if you still want Bunnygram to guess your `baseUrl`
-  },
 });
 ```
