@@ -9,6 +9,7 @@ const config: DocsThemeConfig = {
   },
   head: (
     <>
+      <meta property="og:type" content="website" />
       <meta property="og:title" content="Bunnygram" />
       <meta
         property="og:description"
