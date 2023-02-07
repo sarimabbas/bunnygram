@@ -105,8 +105,8 @@ export default function Home() {
   const runJob = async () => {
     await send({
       config: sendEmail,
+      // 👇 autocomplete on the payload
       payload: {
-        // 👇 you'll get autocomplete here
         emailAddress: "hello@gmail.com",
       },
     });
