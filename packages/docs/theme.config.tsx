@@ -5,15 +5,21 @@ const config: DocsThemeConfig = {
   useNextSeoProps() {
     return {
       titleTemplate: "%s – Bunnygram",
-      description: "Simple task scheduling for Next.js",
-      additionalMetaTags: [
-        {
-          property: "og:image",
-          content: "https://bunnygram.vercel.app/cover.png",
-        },
-      ],
     };
   },
+  head: (
+    <>
+      <meta property="og:title" content="Bunnygram" />
+      <meta
+        property="og:description"
+        content="Simple task scheduling for Next.js"
+      />
+      <meta
+        property="og:image"
+        content="https://bunnygram.vercel.app/cover.png"
+      />
+    </>
+  ),
   footer: {
     text: <p>MIT {new Date().getFullYear()} © Bunnygram.</p>,
   },
