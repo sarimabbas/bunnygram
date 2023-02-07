@@ -60,11 +60,7 @@ export const sendEmail = makeConfig<JobPayload, JobResponse>({
 });
 ```
 
-A few important things to note here:
-
-- Notice how we specify the payload and response for the job we are about to write (more on that in step 2). This allows for better intellisense.
-- We specify the API route the scheduler will be available on.
-- There is some optional config. Crucially, if you are testing on `localhost` you have to specify the `baseUrl` explicitly.
+You can find out more about the [config here](/config).
 
 ### Step 2: Set up a Next.js API route
 

@@ -16,6 +16,10 @@ export const schedulerConfig = makeConfig<JobPayload, JobResponse>({
 });
 ```
 
+## Generics
+
+The `makeConfig` function is generic. You can specify the structure of your job's payload and response (in that order) as TypeScript types and pass them to it. This gives you Intellisense in the `send()` and `onReceive()` functions.
+
 ## `route`
 
 This is a required property. This helps both the `send()` and `onReceive()` functions communicate with each other. This is the relative path to an API route e.g. `/api/send-email` or `/api/do-some-expensive-task`.
