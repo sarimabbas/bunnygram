@@ -6,6 +6,7 @@ const config: DocsThemeConfig = {
     return {
       titleTemplate: "%s – Bunnygram",
       description: "Simple task scheduling for Next.js",
+      additionalMetaTags: [{ property: "og:image", content: "/cover.png" }],
     };
   },
   footer: {
