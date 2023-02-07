@@ -5,6 +5,7 @@ const config: DocsThemeConfig = {
   useNextSeoProps() {
     return {
       titleTemplate: "%s – Bunnygram",
+      description: "Simple task scheduling for Next.js",
     };
   },
   footer: {
