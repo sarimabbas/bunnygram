@@ -8,19 +8,19 @@ import { send } from "./send";
 // ----- test
 
 interface TestJP {
-  boopy: string;
+  hello: string;
 }
 
 interface TestJR {
-  doopy: string;
+  world: string;
 }
 
 const config: IConfig<TestJP, TestJR> = {
-  route: "/poop",
+  route: "/example",
 };
 
 const c = makeConfig<TestJP, TestJR>({
-  route: "/poop",
+  route: "/example",
   adapter: BasicAdapter(),
 });
 
@@ -28,7 +28,7 @@ onReceive({
   config: c,
   job: async ({ payload }) => {
     return {
-      doopy: payload.boopy,
+      world: payload.hello,
     };
   },
 });
@@ -36,6 +36,6 @@ onReceive({
 send({
   config: c,
   payload: {
-    boopy: "ejf",
+    hello: "goodbye",
   },
 });
