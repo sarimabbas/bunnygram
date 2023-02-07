@@ -2,18 +2,19 @@
 
 ## `baseUrl`
 
-If your app is hosted on Vercel, Bunnygram will try to guess your `baseUrl`. Otherwise if your app is deployed to another host, or you are testing on `localhost`, you should set the `baseUrl` manually in the `Scheduler` config.
+If your app is hosted on Vercel, Bunnygram will try to guess your `baseUrl`. Otherwise if your app is deployed to another host, or you are testing on `localhost`, you should set the `baseUrl` manually in the config.
 
 Note that most adapters (except for the basic adapter) won't work when testing on `localhost`, since these services have no way of talking to your `localhost`. To overcome this limitation, you can use `ngrok`, `tailscale` etc. which can help expose your computer to the internet.
 
 ## Payload validation with Zod
 
-You can add runtime type safety by providing a validator to the `Scheduler` config, like this:
+You can add runtime type safety by providing a validator to the config, like this:
 
 ```ts
 // tasks/send-email.ts
 
 import { z } from "zod";
+import { makeConfig } from "bunnygram";
 
 const JobPayloadSchema = z.object({
   emailAddress: z.string(),
@@ -24,7 +25,7 @@ interface JobResponse {
   status: boolean;
 }
 
-export const sendEmail = Scheduler<
+export const sendEmail = makeConfig<
   z.infer<typeof JobPayloadSchema>,
   JobResponse
 >({
@@ -39,6 +40,4 @@ The validator will be run inside the handler to make sure that the received data
 
 Conceptually, Bunnygram is straighforward. It instantiates a Next.js API handler and another function to invoke it. It abstracts away some of the boilerplate regarding parsing request bodies, providing type safety and so on.
 
-The flow of data is as follows. The `Scheduler().send()` function (introduced previously) sends a `POST` request with your payload to your adapter's backend e.g. QStash. That backend will then forward that payload by sending another `POST` request to the API handler. The handler will receive the data and run your job with it.
-
-If you look at the source code on GitHub, what might be a little confusing is how server-side Next.js API handler code and its client code are colocated in the same file. But that is what makes shared typing possible in order to improve DX.
+The flow of data is as follows. The `send()` function (introduced previously) sends a `POST` request with your payload to your adapter's backend e.g. QStash. That backend will then forward that payload by sending another `POST` request to the API handler. The handler will receive the data in `onReceive()` and run your job with it.
