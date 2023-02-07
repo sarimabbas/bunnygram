@@ -18,6 +18,8 @@ pnpm add bunnygram
 
 You can also use `npm` or `yarn` etc.
 
+Note that Bunnygram is ESM only.
+
 ## Documentation
 
 Find the latest documentation on <https://bunnygram.vercel.app/>

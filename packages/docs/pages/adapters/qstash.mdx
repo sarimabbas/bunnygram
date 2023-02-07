@@ -1,0 +1,77 @@
+# QStash adapter
+
+QStash is the recommended adapter for use with Bunnygram. You can find out more about QStash on https://docs.upstash.com/qstash. Using QStash, you can configure retries, delays, cron and more.
+
+This adapter wraps https://github.com/upstash/sdk-qstash-ts. Many thanks to the Upstash developers for building it!
+
+## Using the QStash adapter
+
+Put your scheduler config somewhere e.g. `tasks/send-email.ts`:
+
+```ts
+// tasks/send-email.ts
+
+import { makeConfig, QStashAdapter } from "bunnygram";
+
+interface JobPayload {
+  emailAddress: string;
+}
+
+interface JobResponse {
+  status: boolean;
+}
+
+export const sendEmail = makeConfig<JobPayload, JobResponse>({
+  route: "/api/send-email",
+  adapter: QStashAdapter({}),
+});
+```
+
+## Required config
+
+QStash requires 3 environment variables to be set:
+
+- `QSTASH_TOKEN`
+- `QSTASH_CURRENT_SIGNING_KEY`
+- `QSTASH_NEXT_SIGNING_KEY`
+
+You can find these in your QStash console. It is recommended to set them in your `.env.local` for local development, and on your hosting provider's dashboard for production deployments.
+
+Alternatively, you can also pass the config in code:
+
+```ts
+export const sendEmail = makeConfig<JobPayload, JobResponse>({
+  route: "/api/send-email",
+  adapter: QStashAdapter({
+    config: {
+      qstashCurrentSigningKey: "",
+      qstashNextSigningKey: "",
+      qstashToken: "",
+    },
+  }),
+});
+```
+
+## Send options
+
+You can also set send/publish options for the underlying QStash SDK e.g. retries, delays. You can learn more about what each option does in the QStash docs https://docs.upstash.com/qstash.
+
+```ts
+export const sendEmail = makeConfig<JobPayload, JobResponse>({
+  route: "/api/send-email",
+  adapter: QStashAdapter({
+    sendOptions: {
+      callback,
+      contentBasedDeduplication,
+      cron,
+      deduplicationId,
+      delay,
+      headers,
+      notBefore,
+      retries,
+      topic,
+      url,
+    },
+  }),
+});
+```
