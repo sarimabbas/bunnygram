@@ -27,17 +27,39 @@ export const QStashAdapter = <JP>(props: IQStashAdapterProps): IAdapter<JP> => {
     send: async (sendProps) => {
       const sendConfig = getQStashSendConfig(config);
 
-      const qstashClient = new Client({
-        token: sendConfig.qstashToken,
-      });
+      let qstashClient: Client;
+      try {
+        qstashClient = new Client({
+          token: sendConfig.qstashToken,
+        });
+      } catch (e) {
+        console.error(e);
+        return {
+          error: true,
+          message:
+            e instanceof Error
+              ? e.message
+              : "Failed to initialize qstash client",
+        };
+      }
 
       const { payload, url } = sendProps;
 
-      const { messageId } = await qstashClient.publishJSON({
-        url,
-        body: payload,
-        ...sendOptions,
-      });
+      let messageId: string;
+      try {
+        const response = await qstashClient.publishJSON({
+          url,
+          body: payload,
+          ...sendOptions,
+        });
+        messageId = response.messageId;
+      } catch (e) {
+        console.error(e);
+        return {
+          error: true,
+          message: e instanceof Error ? e.message : "qstash.publishJSON failed",
+        };
+      }
 
       return {
         error: false,

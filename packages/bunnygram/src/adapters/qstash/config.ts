@@ -5,9 +5,9 @@ export const ZQStashSendConfig = z.object({
     description:
       "The qstash token. We try to infer from process.env, so this is optional",
     invalid_type_error:
-      "Did you forget to set QSTASH_TOKEN or pass it in via config?",
+      "Did you forget to set QSTASH_TOKEN or NEXT_PUBLIC_QSTASH_TOKEN or pass it in via config?",
     required_error:
-      "Did you forget to set QSTASH_TOKEN or pass it in via config?",
+      "Did you forget to set QSTASH_TOKEN or NEXT_PUBLIC_QSTASH_TOKEN or pass it in via config?",
   }),
 });
 
