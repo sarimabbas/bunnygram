@@ -12,7 +12,6 @@ export const onReceiveNode = <JP, JR>(
   const { adapter = BasicAdapter(), validator } = config;
   const runtime = getRuntime();
 
-  // runtime === node
   return async (
     req: NextApiRequest,
     res: NextApiResponse<IReceiveReturnValue<JR>>
