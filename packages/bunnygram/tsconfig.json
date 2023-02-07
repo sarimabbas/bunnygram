@@ -93,9 +93,9 @@
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
   "include": [
-    "src"
+    "./src"
   ],
   "exclude": [
-    "tsup.config.ts"
+    "./tsup.config.ts"
   ],
 }

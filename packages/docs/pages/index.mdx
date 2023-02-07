@@ -1,0 +1,110 @@
+# Bunnygram 🐇📬
+
+Effortless task scheduling for Next.js
+
+## Introduction
+
+Bunnygram is a task scheduler for Next.js. You might need it if you want to defer a computationally expensive or long-running task in the background.
+
+You can choose from multiple adapters, including [QStash](https://docs.upstash.com/qstash), with more coming soon.
+
+It borrows from patterns introduced by a similar library [Quirrel](https://github.com/quirrel-dev/quirrel), which was one of the first to make adding task/job queues to Next.js more developer friendly.
+
+## Install
+
+```sh
+pnpm add bunnygram
+```
+
+You can also use `yarn` or `npm`.
+
+## Setup
+
+Suppose you wanted to send your user an email when they signed up. Here's how you can kick off the email job in the background with Bunnygram:
+
+### Step 1: Define your scheduler
+
+Put your scheduler definition somewhere e.g. `tasks/send-email.ts`:
+
+```ts
+// tasks/send-email.ts
+
+import { Scheduler } from "bunnygram";
+
+interface JobPayload {
+  emailAddress: string;
+}
+
+interface JobResponse {
+  status: boolean;
+}
+
+export const sendEmail = Scheduler<JobPayload, JobResponse>({
+  // the path this API route will be accessible on
+  route: "/api/send-email",
+  config: {
+    // ... optional config
+    // if you're just testing on localhost, you also need to supply the baseUrl here:
+    baseUrl: "http://localhost:3000",
+  },
+});
+```
+
+A few important things to note here:
+
+- Notice how we specify the payload and response for the job we are about to write (more on that in step 2). This allows for better intellisense.
+- We specify the API route the scheduler will be available on.
+- There is some optional config. Crucially, if you are testing on `localhost` you have to specify the `baseUrl` explicitly.
+
+### Step 2: Set up a Next.js API route
+
+```ts
+// pages/api/send-email.ts
+
+import { sendEmail } from "@/tasks/send-email";
+import { mailchimp } from "example-email-api";
+
+export default sendEmail.onReceive({
+  // the job to run
+  // autocomplete 👇 on the payload
+  job: async ({ emailAddress }) => {
+    await mailchimp.send({
+      // ... use the payload
+    });
+    return {
+      status: true,
+    };
+  },
+});
+
+// we need to disable body parser, because some adapters need the raw request body for verification
+// you can read more here https://nextjs.org/docs/api-routes/request-helpers
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+```
+
+### Step 3: Send a message
+
+Send a message to the receiver from anywhere else inside our Next.js app:
+
+```tsx
+// src/pages/index.tsx
+
+import { sendEmail } from "@/tasks/send-email";
+
+export default function Home() {
+  const runJob = async () => {
+    await sendEmail.send({
+      payload: {
+        // 👇 you'll get autocomplete here
+        emailAddress: "hello@gmail.com",
+      },
+    });
+  };
+
+  return <button onClick={runJob}>Send email</button>;
+}
+```
