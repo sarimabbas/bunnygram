@@ -34,7 +34,7 @@ export const sendEmail = makeConfig<
 });
 ```
 
-The validator will be run inside the handler to make sure that the received data conforms to the expected type.
+The validator will be run inside both `send()` and `onReceive()` to make sure that the received data conforms to the expected type.
 
 ## How it works
 
