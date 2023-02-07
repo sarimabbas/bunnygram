@@ -1,0 +1,63 @@
+# Config
+
+This page goes over the configuration options for the `makeConfig` function.
+
+```ts
+import { makeConfig } from "bunnygram";
+
+interface JobPayload {}
+interface JobResponse {}
+
+export const schedulerConfig = makeConfig<JobPayload, JobResponse>({
+  route,
+  baseUrl,
+  adapter,
+  validator,
+});
+```
+
+## `route`
+
+This is a required property. This helps both the `send()` and `onReceive()` functions communicate with each other. This is the relative path to an API route e.g. `/api/send-email` or `/api/do-some-expensive-task`.
+
+Note that: `baseUrl` + `route` = the full URL that `send()` will send your payload to. More on `baseUrl` below.
+
+## `baseUrl`
+
+If your app is hosted on Vercel, Bunnygram will try to guess your `baseUrl`. Otherwise if your app is deployed to another host, or you are testing on `localhost`, you should set the `baseUrl` manually in the config. You might want to set the URL conditionally in dev/prod based on `process.env`. You can see an example of how to do that in the [Basic adapter](/adapters/basic) docs.
+
+Note that most adapters (except for the Basic adapter) won't work when testing on `localhost`, since these services have no way of talking to your `localhost`. To overcome this limitation, you can use `ngrok`, `tailscale` etc. which can help expose your computer to the internet.
+
+## `adapter`
+
+Which adapter you'd like to use with Bunnygram. By default this is the [Basic adapter](/adapters/basic). We recommend using another adapter instead. You can consult the adapter docs to find one that meets your use case.
+
+## `validator`
+
+You can add runtime type safety by providing a Zod validator to the config, like this:
+
+```ts
+// tasks/send-email.ts
+
+import { z } from "zod";
+import { makeConfig } from "bunnygram";
+
+const JobPayloadSchema = z.object({
+  emailAddress: z.string(),
+  emailBody: z.string(),
+});
+
+interface JobResponse {
+  status: boolean;
+}
+
+export const sendEmail = makeConfig<
+  z.infer<typeof JobPayloadSchema>,
+  JobResponse
+>({
+  route: "/api/send-email",
+  validator: JobPayloadSchema,
+});
+```
+
+The validator will be run inside both `send()` and `onReceive()` to make sure that the received data conforms to the expected type.

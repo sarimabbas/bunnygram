@@ -11,3 +11,9 @@ Your job is run inside a Next.js API route.
 If you deployed your Next.js app to a "serverful" provider e.g. AWS, Render or Railway, these API routes usually don't have any hard timeout beyond that which you set.
 
 If you deployed your Next.js app to a "serverless" provider e.g. Vercel or Netlify, these API routes usually have a timeout, usually a couple of minutes. You can consult their documentation for the exact numbers.
+
+### How does Bunnygram work?
+
+Conceptually, Bunnygram is straighforward. It instantiates a Next.js API handler and another function to invoke it. It abstracts away some of the boilerplate regarding parsing request bodies, providing type safety and so on.
+
+The flow of data is as follows. The `send()` function (introduced in other pages of these docs) sends a `POST` request with your payload to your adapter's backend e.g. QStash. That backend will then forward that payload by sending another `POST` request to the API handler. The handler will receive the data in `onReceive()` and run your job with it.
