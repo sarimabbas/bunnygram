@@ -38,21 +38,9 @@ const MyAdapter = <JP>(): IAdapter<JP> => {
 
 ## Runtimes
 
-We want to ensure that if a user creates a `Scheduler` with your adapter, and then uses `Scheduler.send()` in the browser, they do not get an error. This should be simple enough to do by guarding your runtime-specific logic. For example, you can use the `isBrowser()` utility function to guard your `verify` function, which may need to utilize Node-only APIs for request verification:
+Your adapter should be resilient to running in different JavaScript runtimes e.g. browser, Edge runtime for Edge functions, and Nodejs for serverless functions.
 
-```ts
-import { isBrowser } from "../../utils";
+Here are some tips you can use:
 
-return {
-  verify: async () => {
-    // no-op
-    if (isBrowser()) {
-      return {
-        verified: true,
-      };
-    }
-
-    // ... rest of your code below
-  },
-};
-```
+1. We pass the current `runtime` as part of the `sendProps` on the ` send` function and `verifyProps` on the `verify` function. You can use that for conditional logic.
+2. Even if you have conditional guards, you can still run into import errors if, for example, you have a Node.js-specific dependency and the import statement is read by the browser (or any other incompatible import combination between the runtimes). To prevent this, you can use runtime dynamic imports: <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import>. As reference, check the source code of the QStash adapter.
