@@ -20,7 +20,7 @@ You can also use `npm` or `yarn` etc.
 
 ## Documentation
 
-Find the latest documentation on <https://bunnygram.doom.sh>
+Find the latest documentation on <https://bunnygram.vercel.app/>
 
 ## Contributing
 
