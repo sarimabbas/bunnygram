@@ -9,7 +9,7 @@ const config: DocsThemeConfig = {
     };
   },
   footer: {
-    text: <p>MIT 2023 © Bunnygram.</p>,
+    text: <p>MIT {new Date().getFullYear()} © Bunnygram.</p>,
   },
   project: {
     link: "https://github.com/sarimabbas/bunnygram",
