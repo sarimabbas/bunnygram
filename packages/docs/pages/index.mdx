@@ -24,12 +24,12 @@ Suppose you wanted to send your user an email when they signed up. Here's how yo
 
 ### Step 1: Define your scheduler
 
-Put your scheduler definition somewhere e.g. `tasks/send-email.ts`:
+Put your scheduler config somewhere e.g. `tasks/send-email.ts`:
 
 ```ts
 // tasks/send-email.ts
 
-import { Scheduler } from "bunnygram";
+import { makeConfig } from "bunnygram";
 
 interface JobPayload {
   emailAddress: string;
@@ -39,14 +39,15 @@ interface JobResponse {
   status: boolean;
 }
 
-export const sendEmail = Scheduler<JobPayload, JobResponse>({
+export const sendEmail = makeConfig<JobPayload, JobResponse>({
   // the path this API route will be accessible on
   route: "/api/send-email",
-  config: {
-    // ... optional config
-    // if you're just testing on localhost, you also need to supply the baseUrl here:
-    baseUrl: "http://localhost:3000",
-  },
+
+  // if you're just testing on localhost, you also need to supply the baseUrl here:
+  // baseUrl: "http://localhost:3000",
+
+  // the default adapter is BasicAdapter, but you can specify the one you want
+  // adapter: BasicAdapter()
 });
 ```
 
@@ -61,16 +62,20 @@ A few important things to note here:
 ```ts
 // pages/api/send-email.ts
 
+import { onReceive } from "bunnygram";
 import { sendEmail } from "@/tasks/send-email";
 import { mailchimp } from "example-email-api";
 
-export default sendEmail.onReceive({
+export default onReceive({
+  config: sendEmail,
   // the job to run
   // autocomplete 👇 on the payload
-  job: async ({ emailAddress }) => {
+  job: async ({ payload }) => {
+    const { emailAddress } = payload;
     await mailchimp.send({
       // ... use the payload
     });
+    // 👇 autocomplete on the response
     return {
       status: true,
     };
@@ -93,11 +98,13 @@ Send a message to the receiver from anywhere else inside our Next.js app:
 ```tsx
 // src/pages/index.tsx
 
+import { send } from "bunnygram";
 import { sendEmail } from "@/tasks/send-email";
 
 export default function Home() {
   const runJob = async () => {
-    await sendEmail.send({
+    await send({
+      config: sendEmail,
       payload: {
         // 👇 you'll get autocomplete here
         emailAddress: "hello@gmail.com",
