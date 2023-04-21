@@ -21,18 +21,18 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@upstash/qstash": "^0.3.4",
-    "zod": "^3.20.2"
+    "@upstash/qstash": "^0.3.6",
+    "@whatwg-node/fetch": "^0.8.5",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
-    "@types/node": "^18.11.18",
-    "@vitest/coverage-c8": "^0.28.3",
-    "next": "^13.1.5",
+    "@types/node": "^18.15.13",
+    "@vitest/coverage-c8": "^0.30.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "tsup": "^6.5.0",
-    "typescript": "^4.9.3",
-    "vitest": "^0.28.3",
-    "zx": "^7.1.1"
+    "tsup": "^6.7.0",
+    "typescript": "^5.0.4",
+    "vitest": "^0.30.1",
+    "zx": "^7.2.1"
   }
 }

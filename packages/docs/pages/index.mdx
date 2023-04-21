@@ -5,8 +5,7 @@ import { Callout } from "nextra-theme-docs";
 Simple task scheduling for Next.js
 
 <Callout type="warning" emoji="⚠️">
-  Note that these docs are still being written. If you find inaccuracies or
-  anything missing, please open an issue on GitHub!
+  If you find inaccuracies or anything missing, please open an issue on GitHub!
 </Callout>
 
 <br />
@@ -37,7 +36,7 @@ pnpm add bunnygram
 
 You can also use `yarn` or `npm`.
 
-Note that Bunnygram is ESM only.
+Note that Bunnygram is 1) ESM only and 2) works with Next.js 13.2 or later (which introduces route handlers).
 
 ## Setup
 
@@ -61,7 +60,7 @@ interface JobResponse {
 }
 
 export const sendEmail = makeConfig<JobPayload, JobResponse>({
-  // the path this API route will be accessible on
+  // where the route handler will be accessible on
   route: "/api/send-email",
 
   // if you're just testing on localhost, you also need to supply the baseUrl here:
@@ -74,16 +73,16 @@ export const sendEmail = makeConfig<JobPayload, JobResponse>({
 
 You can find out more about the [config here](/config).
 
-### Step 2: Set up a Next.js API route
+### Step 2: Set up a Next.js route handler
 
 ```ts
-// pages/api/send-email.ts
+// app/api/send-email/route.ts
 
 import { onReceive } from "bunnygram";
 import { sendEmail } from "@/tasks/send-email";
 import { mailchimp } from "example-email-api";
 
-export default onReceive({
+export const POST = onReceive({
   config: sendEmail,
   // the job to run
   // autocomplete 👇 on the payload
@@ -98,17 +97,7 @@ export default onReceive({
     };
   },
 });
-
-// we need to disable body parser, because some adapters need the raw request body for verification
-// you can read more here https://nextjs.org/docs/api-routes/request-helpers
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 ```
-
-- You can use `onReceive()` inside an API route that is running in either the Serverless/Node runtime or the Edge runtime.
 
 ### Step 3: Send a message
 

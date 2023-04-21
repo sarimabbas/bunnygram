@@ -1,6 +1,4 @@
 import { Client, Receiver, type PublishJsonRequest } from "@upstash/qstash";
-import type { NextApiRequest } from "next";
-import type { NextRequest } from "next/server";
 import type { IAdapter } from "../types";
 import {
   getQStashSendConfig,
@@ -82,12 +80,7 @@ export const QStashAdapter = <JP>(props: IQStashAdapterProps): IAdapter<JP> => {
         nextSigningKey: verifyConfig.qstashNextSigningKey,
       });
 
-      let signature: any = "";
-      if (runtime === "edge") {
-        signature = (req as NextRequest).headers.get("upstash-signature");
-      } else {
-        signature = (req as NextApiRequest).headers["upstash-signature"];
-      }
+      const signature = req.headers.get("upstash-signature");
 
       if (!signature) {
         return {

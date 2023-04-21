@@ -1,7 +1,9 @@
+"use client";
+
 import { sendEmail } from "@/tasks/send-email";
 import { send } from "bunnygram";
 
-export default function Home() {
+const Page = () => {
   const runJob = async () => {
     const resp = await send({
       config: sendEmail,
@@ -9,12 +11,14 @@ export default function Home() {
         name: "sarim",
       },
     });
-    console.log({ runJobResp: resp });
+    console.log({ fromReceive: resp });
   };
 
   return (
-    <main>
+    <div>
       <button onClick={runJob}>Run job</button>
-    </main>
+    </div>
   );
-}
+};
+
+export default Page;

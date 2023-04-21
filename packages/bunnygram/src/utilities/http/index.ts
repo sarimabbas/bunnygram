@@ -1,7 +1,5 @@
-import type { NextRequest } from "next/server";
-
 export const getFetchRequestBody = async <T>(
-  req: NextRequest
+  req: Request
 ): Promise<{
   parsedBody: T | undefined;
   rawBody: string;
@@ -13,7 +11,7 @@ export const getFetchRequestBody = async <T>(
   // parse as json
   let parsedBody: T | undefined = undefined;
   if (clonedRequestForJson.headers.get("content-type") === "application/json") {
-    parsedBody = clonedRequestForJson.json() as T;
+    parsedBody = (await clonedRequestForJson.json()) as T;
   }
 
   // parse as text
