@@ -1,8 +1,7 @@
-import type { ServerRuntime } from "next";
 import { z } from "zod";
 import type { IAdapter } from "../../adapters";
 
-export type IRuntime = Extract<ServerRuntime, "nodejs" | "edge"> | "browser";
+export type IRuntime = "nodejs" | "edge" | "browser";
 
 export interface IConfig<JP, JR> {
   route: string;
