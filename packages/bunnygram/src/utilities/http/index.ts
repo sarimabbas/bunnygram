@@ -7,8 +7,8 @@ export const getFetchRequestBody = async <T>(
   rawBody: string;
 }> => {
   // clone the req so we don't consume the body
-  const clonedRequestForJson = req.clone();
-  const clonedRequestForText = req.clone();
+  const clonedRequestForJson = new Request(req);
+  const clonedRequestForText = new Request(req);
 
   // parse as json
   let parsedBody: T | undefined = undefined;
