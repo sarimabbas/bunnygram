@@ -1,4 +1,3 @@
-import type { NextRequest, NextResponse } from "next/server";
 import type { IConfig } from "../config";
 
 export interface IReceiveProps<JP, JR> {
@@ -14,7 +13,7 @@ export interface IReceiveReturnValue<JR> {
 
 export interface IJobProps<JP> {
   payload: JP;
-  req: NextRequest;
+  req: Request;
 }
 
-export type IHandler<JR> = (req: NextRequest) => Promise<NextResponse>;
+export type IHandler<JR> = (req: Request) => Promise<Response>;

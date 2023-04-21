@@ -1,19 +1,17 @@
-import type { NextRequest } from "next/server";
-
 export const getFetchRequestBody = async <T>(
-  req: NextRequest
+  req: Request
 ): Promise<{
   parsedBody: T | undefined;
   rawBody: string;
 }> => {
   // clone the req so we don't consume the body
-  const clonedRequestForJson = new Request(req);
-  const clonedRequestForText = new Request(req);
+  const clonedRequestForJson = req.clone();
+  const clonedRequestForText = req.clone();
 
   // parse as json
   let parsedBody: T | undefined = undefined;
   if (clonedRequestForJson.headers.get("content-type") === "application/json") {
-    parsedBody = clonedRequestForJson.json() as T;
+    parsedBody = (await clonedRequestForJson.json()) as T;
   }
 
   // parse as text

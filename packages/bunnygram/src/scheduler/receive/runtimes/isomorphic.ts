@@ -1,4 +1,4 @@
-import type { NextRequest, NextResponse } from "next/server";
+import { Response } from "@whatwg-node/fetch";
 import { BasicAdapter } from "../../../adapters";
 import { getFetchRequestBody } from "../../../utilities/http";
 import { getRuntime } from "../../config";
@@ -14,15 +14,11 @@ export const makeOnReceiveRouteHandler = <JP, JR>(
   const { adapter = BasicAdapter(), validator } = config;
   const runtime = getRuntime();
 
-  return async (req: NextRequest): Promise<NextResponse> => {
-    // dynamically import here to prevent importing in browser
-    // (since the browser will still read this file top-down)
-    const NextResponse = (await import("next/server")).NextResponse;
-
+  return async (req: Request): Promise<Response> => {
     // ----- check request method
 
     if (req.method !== "POST") {
-      return NextResponse.json(statusMessages["err-post-only"].msg, {
+      return Response.json(statusMessages["err-post-only"].msg, {
         status: statusMessages["err-post-only"].httpStatusCode,
       });
     }
@@ -40,7 +36,7 @@ export const makeOnReceiveRouteHandler = <JP, JR>(
     });
 
     if (!verification.verified) {
-      return NextResponse.json(statusMessages["err-adapter-verify"].msg, {
+      return Response.json(statusMessages["err-adapter-verify"].msg, {
         status: statusMessages["err-adapter-verify"].httpStatusCode,
       });
     }
@@ -53,7 +49,7 @@ export const makeOnReceiveRouteHandler = <JP, JR>(
       const p = validator.safeParse(payload);
       if (!p.success) {
         console.error(p.error);
-        return NextResponse.json(statusMessages["err-validate-payload"].msg, {
+        return Response.json(statusMessages["err-validate-payload"].msg, {
           status: statusMessages["err-validate-payload"].httpStatusCode,
         });
       }
@@ -66,7 +62,7 @@ export const makeOnReceiveRouteHandler = <JP, JR>(
         payload,
         req,
       });
-      return NextResponse.json(
+      return Response.json(
         {
           jobResponse,
           ...statusMessages["success-job-run"].msg,
@@ -77,7 +73,7 @@ export const makeOnReceiveRouteHandler = <JP, JR>(
       );
     } catch (err) {
       console.error(err);
-      return NextResponse.json(statusMessages["err-job-run"].msg, {
+      return Response.json(statusMessages["err-job-run"].msg, {
         status: statusMessages["err-job-run"].httpStatusCode,
       });
     }
