@@ -1,4 +1,4 @@
-import { makeConfig, QStashAdapter } from "bunnygram";
+import { BasicAdapter, makeConfig } from "bunnygram";
 
 interface JobPayload {
   name: string;
@@ -9,10 +9,10 @@ interface JobResponse {
 }
 
 export const sendEmail = makeConfig<JobPayload, JobResponse>({
-  route: "/api/send-email",
+  route: "/example-route",
   baseUrl:
     process.env.NODE_ENV === "development"
       ? "http://localhost:3000"
       : undefined,
-  adapter: QStashAdapter({}),
+  adapter: BasicAdapter(),
 });
