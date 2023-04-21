@@ -3,8 +3,8 @@ import { onReceive } from "bunnygram";
 
 export const POST = onReceive({
   config: sendEmail,
-  job: async ({ payload }) => {
-    console.log("hello ", payload.name);
+  job: async (props) => {
+    console.log({ fromSend: props });
     return {
       status: true,
     };

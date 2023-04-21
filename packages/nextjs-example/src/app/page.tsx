@@ -11,7 +11,7 @@ const Page = () => {
         name: "sarim",
       },
     });
-    console.log({ runJobResp: resp });
+    console.log({ fromReceive: resp });
   };
 
   return (
