@@ -1,11 +1,13 @@
 import type { NextRequest, NextResponse } from "next/server";
 import { BasicAdapter } from "../../../adapters";
-import { getFetchRequestBody } from "../../../utilities/http/edge";
+import { getFetchRequestBody } from "../../../utilities/http";
 import { getRuntime } from "../../config";
 import { statusMessages } from "../../messages";
 import type { IHandler, IReceiveProps } from "../types";
 
-export const onReceiveEdge = <JP, JR>(
+// route handlers run in edge and node
+// https://beta.nextjs.org/docs/routing/route-handlers#edge-and-nodejs-runtimes
+export const makeOnReceiveRouteHandler = <JP, JR>(
   props: IReceiveProps<JP, JR>
 ): IHandler<JR> => {
   const { job, config } = props;
@@ -13,10 +15,8 @@ export const onReceiveEdge = <JP, JR>(
   const runtime = getRuntime();
 
   return async (req: NextRequest): Promise<NextResponse> => {
-    // since NextResponse is only available in API routes running under the edge
-    // runtime, we dynamically import here to prevent importing in browser.
-    // (Note that onReceiveEdge is already guarded with an if-condition,
-    // however, the browser will still read this file top-down)
+    // dynamically import here to prevent importing in browser
+    // (since the browser will still read this file top-down)
     const NextResponse = (await import("next/server")).NextResponse;
 
     // ----- check request method
