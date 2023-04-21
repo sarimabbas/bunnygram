@@ -38,6 +38,6 @@ export const getRuntime = (): IRuntime => {
     return "edge";
   }
 
-  // default to nodejs (the most common case)
+  // default to nodejs
   return "nodejs";
 };

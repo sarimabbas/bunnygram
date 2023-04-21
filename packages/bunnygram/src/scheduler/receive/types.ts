@@ -1,4 +1,3 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import type { NextRequest, NextResponse } from "next/server";
 import type { IConfig } from "../config";
 
@@ -15,14 +14,7 @@ export interface IReceiveReturnValue<JR> {
 
 export interface IJobProps<JP> {
   payload: JP;
-  req: NextRequest | NextApiRequest;
+  req: NextRequest;
 }
 
-export type IHandler<JR> =
-  // edge
-  | ((req: NextRequest) => Promise<NextResponse>)
-  // node
-  | ((
-      req: NextApiRequest,
-      res: NextApiResponse<IReceiveReturnValue<JR>>
-    ) => Promise<unknown> | unknown);
+export type IHandler<JR> = (req: NextRequest) => Promise<NextResponse>;

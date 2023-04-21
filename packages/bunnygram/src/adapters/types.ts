@@ -1,4 +1,3 @@
-import type { NextApiRequest } from "next";
 import type { NextRequest } from "next/server";
 import type { IRuntime } from "../scheduler/config";
 import type { IErrorResponse } from "../utilities/types";
@@ -24,7 +23,7 @@ export type IAdapterVerify = (
 ) => Promise<IAdapterVerifyReturnValue>;
 
 export interface IAdapterVerifyProps {
-  req: NextApiRequest | NextRequest;
+  req: NextRequest;
   rawBody: string;
   runtime: IRuntime;
 }
