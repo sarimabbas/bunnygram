@@ -1,6 +1,6 @@
 import type { ServerRuntime } from "next";
 import { z } from "zod";
-import { IAdapter } from "../../adapters";
+import type { IAdapter } from "../../adapters";
 
 export type IRuntime = Extract<ServerRuntime, "nodejs" | "edge"> | "browser";
 

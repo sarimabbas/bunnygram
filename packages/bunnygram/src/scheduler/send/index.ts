@@ -1,5 +1,5 @@
-import { BasicAdapter, IAdapterSendReturnValue } from "../../adapters";
-import { getBaseUrl, getRuntime, IConfig } from "../config";
+import { BasicAdapter, type IAdapterSendReturnValue } from "../../adapters";
+import { getBaseUrl, getRuntime, type IConfig } from "../config";
 
 export interface ISendProps<JP, JR> {
   config: IConfig<JP, JR>;
