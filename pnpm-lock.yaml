@@ -43,9 +43,6 @@ importers:
 
   packages/docs:
     dependencies:
-      '@next/font':
-        specifier: 13.3.0
-        version: 13.3.0
       '@types/node':
         specifier: 18.15.13
         version: 18.15.13
@@ -79,9 +76,6 @@ importers:
 
   packages/nextjs-example:
     dependencies:
-      '@next/font':
-        specifier: 13.3.0
-        version: 13.3.0
       '@types/node':
         specifier: 18.15.13
         version: 18.15.13
@@ -531,10 +525,6 @@ packages:
 
   /@next/env@13.3.0:
     resolution: {integrity: sha512-AjppRV4uG3No7L1plinoTQETH+j2F10TEnrMfzbTUYwze5sBUPveeeBAPZPm8OkJZ1epq9OyYKhZrvbD6/9HCQ==}
-
-  /@next/font@13.3.0:
-    resolution: {integrity: sha512-xUv7VRUA2Zr6n/KJDILyv7/zGy9xKUsyQURaQqYr7lVxn0REScazwyZQzhSm+DnJoUyo+9DcFs2J3WsZXHUvQw==}
-    dev: false
 
   /@next/swc-darwin-arm64@13.3.0:
     resolution: {integrity: sha512-DmIQCNq6JtccLPPBzf0dgh2vzMWt5wjxbP71pCi5EWpWYE3MsP6FcRXi4MlAmFNDQOfcFXR2r7kBeG1LpZUh1w==}
