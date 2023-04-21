@@ -20,6 +20,8 @@ You can also use `npm` or `yarn` etc.
 
 Note that Bunnygram is ESM only.
 
+NPM link: https://www.npmjs.com/package/bunnygram
+
 ## Documentation
 
 Find the latest documentation on <https://bunnygram.vercel.app/>
