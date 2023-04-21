@@ -7,7 +7,7 @@ export const BasicAdapter = <JP>(): IAdapter<JP> => {
     send: async (sendProps) => {
       const { payload, url } = sendProps;
       try {
-        const fetchResp = await fetch(url, {
+        await fetch(url, {
           method: "POST",
           body: JSON.stringify(payload),
           headers: {
