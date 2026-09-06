@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && next export",
     "start": "next start",
     "lint": "next lint"
   },
@@ -12,7 +12,6 @@
     "@types/node": "18.15.13",
     "@types/react": "18.0.37",
     "@types/react-dom": "18.0.11",
-    "@vercel/analytics": "^1.0.0",
     "next": "13.3.0",
     "nextra": "^2.4.0",
     "nextra-theme-docs": "^2.4.0",

@@ -24,7 +24,7 @@ NPM link: https://www.npmjs.com/package/bunnygram
 
 ## Documentation
 
-Find the latest documentation on <https://bunnygram.vercel.app/>
+This project is no longer maintained. Preserved documentation: <https://bunnygram.lil.run/>.
 
 ## Contributing
 

@@ -1,0 +1,7 @@
+{
+  "name": "bunnygram",
+  "account_id": "f7df7fafe5b4e9d4e0446100575c0bf4",
+  "compatibility_date": "2026-09-05",
+  "assets": { "directory": "./packages/docs/out", "not_found_handling": "404-page" },
+  "routes": [{ "pattern": "bunnygram.lil.run", "custom_domain": true }]
+}

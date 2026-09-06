@@ -1,10 +1,14 @@
 import { DocsThemeConfig } from "nextra-theme-docs";
+import { useRouter } from "next/router";
 
 const config: DocsThemeConfig = {
+  banner: { key: 'archived', text: 'RIP — Bunnygram is no longer maintained. These docs are preserved for reference.' },
   logo: <span>Bunnygram 🐇📬</span>,
   useNextSeoProps() {
+    const { asPath } = useRouter();
     return {
       titleTemplate: "%s – Bunnygram",
+      canonical: new URL(asPath.split(/[?#]/)[0], "https://bunnygram.lil.run").href,
     };
   },
   head: (
@@ -17,7 +21,7 @@ const config: DocsThemeConfig = {
       />
       <meta
         property="og:image"
-        content="https://bunnygram.vercel.app/cover.png"
+        content="https://bunnygram.lil.run/cover.png"
       />
     </>
   ),
