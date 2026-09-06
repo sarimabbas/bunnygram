@@ -2,9 +2,11 @@
   "name": "bunnygram-monorepo",
   "version": "1.0.0",
   "repository": "https://github.com/sarimabbas/bunnygram",
-  "homepage": "https://bunnygram.vercel.app",
+  "homepage": "https://bunnygram.lil.run",
+  "packageManager": "pnpm@8.6.7",
   "description": "",
   "scripts": {
+    "build:docs": "corepack pnpm@8.6.7 --filter docs build && node scripts/check-docs.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
